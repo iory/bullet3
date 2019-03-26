@@ -1,3 +1,7 @@
+from pybullet_envs.minitaur.envs.env_randomizers import minitaur_env_randomizer_config
+from pybullet_envs.minitaur.envs import env_randomizer_base
+import tensorflow as tf
+import numpy as np
 """An environment randomizer that randomizes physical parameters from config."""
 
 from __future__ import absolute_import
@@ -7,16 +11,13 @@ from __future__ import print_function
 import functools
 import random
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
 parentdir = os.path.dirname(os.path.dirname(parentdir))
-os.sys.path.insert(0,parentdir)
-
-import numpy as np
-import tensorflow as tf
-from pybullet_envs.minitaur.envs import env_randomizer_base
-from pybullet_envs.minitaur.envs.env_randomizers import minitaur_env_randomizer_config
+os.sys.path.insert(0, parentdir)
 
 SIMULATION_TIME_STEP = 0.001
 
@@ -38,11 +39,11 @@ class MinitaurEnvRandomizerFromConfig(env_randomizer_base.EnvRandomizerBase):
   def randomize_env(self, env):
     """Randomize various physical properties of the environment.
 
-    It randomizes the physical parameters according to the input configuration.
+        It randomizes the physical parameters according to the input configuration.
 
-    Args:
-      env: A minitaur gym environment.
-    """
+        Args:
+          env: A minitaur gym environment.
+        """
     self._randomization_function_dict = self._build_randomization_function_dict(
         env)
     for param_name, random_range in self._randomization_param_dict.iteritems():

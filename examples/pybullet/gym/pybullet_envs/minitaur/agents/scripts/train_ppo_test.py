@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests for the PPO algorithm usage example."""
 
 from __future__ import absolute_import
@@ -28,7 +27,6 @@ from google3.robotics.reinforcement_learning.agents import tools
 from google3.robotics.reinforcement_learning.agents.scripts import configs
 from google3.robotics.reinforcement_learning.agents.scripts import networks
 from google3.robotics.reinforcement_learning.agents.scripts import train
-
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -66,8 +64,11 @@ class PPOTest(tf.test.TestCase):
       config = self._define_config()
       with config.unlocked:
         config.env = functools.partial(
-            tools.MockEnvironment, observ_shape, action_shape=(3,),
-            min_duration=15, max_duration=15)
+            tools.MockEnvironment,
+            observ_shape,
+            action_shape=(3,),
+            min_duration=15,
+            max_duration=15)
         config.max_length = 20
         config.steps = 100
         config.network = network
@@ -78,8 +79,11 @@ class PPOTest(tf.test.TestCase):
     config = self._define_config()
     with config.unlocked:
       config.env = functools.partial(
-          tools.MockEnvironment, observ_shape=(2, 3), action_shape=(3,),
-          min_duration=5, max_duration=25)
+          tools.MockEnvironment,
+          observ_shape=(2, 3),
+          action_shape=(3,),
+          min_duration=5,
+          max_duration=25)
       config.max_length = 25
       config.steps = 200
       config.network = networks.RecurrentGaussianPolicy

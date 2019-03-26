@@ -5,7 +5,6 @@ import numpy as np
 import tensorflow as tf
 from pybullet_envs.minitaur.envs import minitaur_four_leg_stand_env
 
-
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("log_path", None, "The directory to write the log file.")
 NUM_LEGS = 4
@@ -16,10 +15,10 @@ kpitch = 3.0
 def feed_forward_only_control_example(log_path=None):
   """An example of hand-tuned controller for minitaur standing with four legs.
 
-  Args:
-    log_path: The directory that the log files are written to. If log_path is
-      None, no logs will be written.
-  """
+    Args:
+      log_path: The directory that the log files are written to. If log_path is
+        None, no logs will be written.
+    """
   steps = 1000
   episodes = 1
 

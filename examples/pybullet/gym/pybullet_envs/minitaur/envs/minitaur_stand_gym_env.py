@@ -23,12 +23,12 @@ LIMIT_FALLEN = 0.7
 class MinitaurStandGymEnv(minitaur_gym_env.MinitaurGymEnv):
   """The gym environment for the minitaur and a ball.
 
-  It simulates the standing up behavior of a minitaur, a quadruped robot. The
-  state space include the angles, velocities and torques for all the motors and
-  the action space is the desired motor angle for each motor. The reward
-  function is based on how long the minitaur stays standing up.
+    It simulates the standing up behavior of a minitaur, a quadruped robot. The
+    state space include the angles, velocities and torques for all the motors and
+    the action space is the desired motor angle for each motor. The reward
+    function is based on how long the minitaur stays standing up.
 
-  """
+    """
   metadata = {
       "render.modes": ["human", "rgb_array"],
       "video.frames_per_second": 50
@@ -44,15 +44,15 @@ class MinitaurStandGymEnv(minitaur_gym_env.MinitaurGymEnv):
                render=False):
     """Initialize the minitaur standing up gym environment.
 
-    Args:
-      urdf_root: The path to the urdf data folder.
-      action_repeat: The number of simulation steps before actions are applied.
-      observation_noise_stdev: The standard deviation of observation noise.
-      self_collision_enabled: Whether to enable self collision in the sim.
-      motor_velocity_limit: The velocity limit of each motor.
-      pd_control_enabled: Whether to use PD controller for each motor.
-      render: Whether to render the simulation.
-    """
+        Args:
+          urdf_root: The path to the urdf data folder.
+          action_repeat: The number of simulation steps before actions are applied.
+          observation_noise_stdev: The standard deviation of observation noise.
+          self_collision_enabled: Whether to enable self collision in the sim.
+          motor_velocity_limit: The velocity limit of each motor.
+          pd_control_enabled: Whether to use PD controller for each motor.
+          render: Whether to render the simulation.
+        """
     super(MinitaurStandGymEnv, self).__init__(
         urdf_root=urdf_root,
         action_repeat=action_repeat,
@@ -71,17 +71,17 @@ class MinitaurStandGymEnv(minitaur_gym_env.MinitaurGymEnv):
   def _stand_up(self):
     """Make the robot stand up to its two legs when started on 4 legs.
 
-    This method is similar to the step function, but instead of using the action
-    provided, it uses a hand-coded policy to make the robot stand up to its
-    two legs. Once the robot is vertical enough it exits and leaves the
-    environment to the typical step function that uses agent's actions.
+        This method is similar to the step function, but instead of using the action
+        provided, it uses a hand-coded policy to make the robot stand up to its
+        two legs. Once the robot is vertical enough it exits and leaves the
+        environment to the typical step function that uses agent's actions.
 
-    Returns:
-      observations: The angles, velocities and torques of all motors.
-      reward: The reward for the current state-action pair.
-      done: Whether the episode has ended.
-      info: A dictionary that stores diagnostic information.
-    """
+        Returns:
+          observations: The angles, velocities and torques of all motors.
+          reward: The reward for the current state-action pair.
+          done: Whether the episode has ended.
+          info: A dictionary that stores diagnostic information.
+        """
     for t in range(5000):
       if self._is_render:
         base_pos = self.minitaur.GetBasePosition()
@@ -112,10 +112,10 @@ class MinitaurStandGymEnv(minitaur_gym_env.MinitaurGymEnv):
   def _reward(self):
     """Reward function for standing up pose.
 
-    Returns:
-      reward: A number between -1 and 1 according to how vertical is the body of
-        the robot.
-    """
+        Returns:
+          reward: A number between -1 and 1 according to how vertical is the body of
+            the robot.
+        """
     orientation = self.minitaur.GetBaseOrientation()
     rot_matrix = self._pybullet_client.getMatrixFromQuaternion(orientation)
     local_front_vec = rot_matrix[6:9]
@@ -130,12 +130,12 @@ class MinitaurStandGymEnv(minitaur_gym_env.MinitaurGymEnv):
   def _is_horizontal(self):
     """Decide whether minitaur is almost parallel to the ground.
 
-    This method is used in experiments where the robot is learning to stand up.
+        This method is used in experiments where the robot is learning to stand up.
 
-    Returns:
-      Boolean value that indicates whether the minitaur is almost parallel to
-      the ground.
-    """
+        Returns:
+          Boolean value that indicates whether the minitaur is almost parallel to
+          the ground.
+        """
     orientation = self.minitaur.GetBaseOrientation()
     rot_matrix = self._pybullet_client.getMatrixFromQuaternion(orientation)
     front_z_component = rot_matrix[6]
@@ -144,15 +144,15 @@ class MinitaurStandGymEnv(minitaur_gym_env.MinitaurGymEnv):
   def _transform_action_to_motor_command(self, action):
     """Method to transform the one dimensional action to rotate bottom two legs.
 
-    Args:
-      action: A double between -1 and 1, where 0 means keep the legs parallel
-        to the body.
-    Returns:
-      actions: The angles for all motors.
-    Raises:
-      ValueError: The action dimension is not the same as the number of motors.
-      ValueError: The magnitude of actions is out of bounds.
-    """
+        Args:
+          action: A double between -1 and 1, where 0 means keep the legs parallel
+            to the body.
+        Returns:
+          actions: The angles for all motors.
+        Raises:
+          ValueError: The action dimension is not the same as the number of motors.
+          ValueError: The magnitude of actions is out of bounds.
+        """
     action = action[0]
     # Scale the action from [-1 to 1] to [-range to +range] (angle in radians).
     action *= RANGE_OF_LEG_MOTION
@@ -176,24 +176,24 @@ class MinitaurStandGymEnv(minitaur_gym_env.MinitaurGymEnv):
   def _policy_flip(self, time_step, orientation):
     """Hand coded policy to make the minitaur stand up to its two legs.
 
-    This method is the hand coded policy that uses sine waves and orientation
-    of the robot to make it stand up to its two legs. It is composed of these
-    behaviors:
-    - Rotate bottom legs to always point to the ground
-    - Rotate upper legs the other direction so that they point to the sky when
-    the robot is standing up, and they point to the ground when the robot is
-    horizontal.
-    - Shorten the bottom 2 legs
-    - Shorten the other two legs, then when the sine wave hits its maximum,
-    extend the legs pushing the robot up.
+        This method is the hand coded policy that uses sine waves and orientation
+        of the robot to make it stand up to its two legs. It is composed of these
+        behaviors:
+        - Rotate bottom legs to always point to the ground
+        - Rotate upper legs the other direction so that they point to the sky when
+        the robot is standing up, and they point to the ground when the robot is
+        horizontal.
+        - Shorten the bottom 2 legs
+        - Shorten the other two legs, then when the sine wave hits its maximum,
+        extend the legs pushing the robot up.
 
-    Args:
-      time_step: The time (or frame number) used for sine function.
-      orientation: Quaternion specifying the orientation of the body.
+        Args:
+          time_step: The time (or frame number) used for sine function.
+          orientation: Quaternion specifying the orientation of the body.
 
-    Returns:
-      actions: The angles for all motors.
-    """
+        Returns:
+          actions: The angles for all motors.
+        """
     # Set the default behavior (stand on 4 short legs).
     shorten = -0.7
     a0 = math.pi / 2 + shorten

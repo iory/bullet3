@@ -1,18 +1,19 @@
+import pybullet_data
+from pybullet_envs.minitaur.envs import minitaur_gym_env
+import numpy as np
+from gym import spaces
 """This file implements the gym environment of minitaur.
 
 """
 import math
 import random
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
-
-from gym import spaces
-import numpy as np
-from pybullet_envs.minitaur.envs import minitaur_gym_env
-import pybullet_data
+os.sys.path.insert(0, parentdir)
 
 GOAL_DISTANCE_THRESHOLD = 0.8
 GOAL_REWARD = 1000.0
@@ -25,12 +26,12 @@ ACTION_EPS = 0.01
 class MinitaurBallGymEnv(minitaur_gym_env.MinitaurGymEnv):
   """The gym environment for the minitaur and a ball.
 
-  It simulates a minitaur (a quadruped robot) and a ball. The state space
-  includes the angle and distance of the ball relative to minitaur's base.
-  The action space is a steering command. The reward function is based
-  on how far the ball is relative to the minitaur's base.
+    It simulates a minitaur (a quadruped robot) and a ball. The state space
+    includes the angle and distance of the ball relative to minitaur's base.
+    The action space is a steering command. The reward function is based
+    on how far the ball is relative to the minitaur's base.
 
-  """
+    """
 
   def __init__(self,
                urdf_root=pybullet_data.getDataPath(),
@@ -41,17 +42,17 @@ class MinitaurBallGymEnv(minitaur_gym_env.MinitaurGymEnv):
                render=False):
     """Initialize the minitaur and ball gym environment.
 
-    Args:
-      urdf_root: The path to the urdf data folder.
-      self_collision_enabled: Whether to enable self collision in the sim.
-      pd_control_enabled: Whether to use PD controller for each motor.
-      leg_model_enabled: Whether to use a leg motor to reparameterize the action
-        space.
-      on_rack: Whether to place the minitaur on rack. This is only used to debug
-        the walking gait. In this mode, the minitaur's base is hanged midair so
-        that its walking gait is clearer to visualize.
-      render: Whether to render the simulation.
-    """
+        Args:
+          urdf_root: The path to the urdf data folder.
+          self_collision_enabled: Whether to enable self collision in the sim.
+          pd_control_enabled: Whether to use PD controller for each motor.
+          leg_model_enabled: Whether to use a leg motor to reparameterize the action
+            space.
+          on_rack: Whether to place the minitaur on rack. This is only used to debug
+            the walking gait. In this mode, the minitaur's base is hanged midair so
+            that its walking gait is clearer to visualize.
+          render: Whether to render the simulation.
+        """
     super(MinitaurBallGymEnv, self).__init__(
         urdf_root=urdf_root,
         self_collision_enabled=self_collision_enabled,
@@ -63,18 +64,18 @@ class MinitaurBallGymEnv(minitaur_gym_env.MinitaurGymEnv):
     self._cam_yaw = -70
     self._cam_pitch = -30
     self.action_space = spaces.Box(np.array([-1]), np.array([1]))
-    self.observation_space = spaces.Box(np.array([-math.pi, 0]),
-                                        np.array([math.pi, 100]))
+    self.observation_space = spaces.Box(
+        np.array([-math.pi, 0]), np.array([math.pi, 100]))
 
   def reset(self):
     self._ball_id = 0
     super(MinitaurBallGymEnv, self).reset()
     self._init_ball_theta = random.uniform(-INIT_BALL_ANGLE, INIT_BALL_ANGLE)
     self._init_ball_distance = INIT_BALL_DISTANCE
-    self._ball_pos = [self._init_ball_distance *
-                      math.cos(self._init_ball_theta),
-                      self._init_ball_distance *
-                      math.sin(self._init_ball_theta), 1]
+    self._ball_pos = [
+        self._init_ball_distance * math.cos(self._init_ball_theta),
+        self._init_ball_distance * math.sin(self._init_ball_theta), 1
+    ]
     self._ball_id = self._pybullet_client.loadURDF(
         "%s/sphere_with_restitution.urdf" % self._urdf_root, self._ball_pos)
     return self._get_observation()
@@ -88,11 +89,9 @@ class MinitaurBallGymEnv(minitaur_gym_env.MinitaurGymEnv):
     minitaur_translation_world, minitaur_rotation_world = (
         self._pybullet_client.invertTransform(world_translation_minitaur,
                                               world_rotation_minitaur))
-    minitaur_translation_ball, _ = (
-        self._pybullet_client.multiplyTransforms(minitaur_translation_world,
-                                                 minitaur_rotation_world,
-                                                 world_translation_ball,
-                                                 world_rotation_ball))
+    minitaur_translation_ball, _ = (self._pybullet_client.multiplyTransforms(
+        minitaur_translation_world, minitaur_rotation_world,
+        world_translation_ball, world_rotation_ball))
     distance = math.sqrt(minitaur_translation_ball[0]**2 +
                          minitaur_translation_ball[1]**2)
     angle = math.atan2(minitaur_translation_ball[0],
@@ -103,10 +102,10 @@ class MinitaurBallGymEnv(minitaur_gym_env.MinitaurGymEnv):
   def _transform_action_to_motor_command(self, action):
     if self._leg_model_enabled:
       for i, action_component in enumerate(action):
-        if not (-self._action_bound - ACTION_EPS <=
-                action_component <= self._action_bound + ACTION_EPS):
-          raise ValueError("{}th action {} out of bounds.".format
-                           (i, action_component))
+        if not (-self._action_bound - ACTION_EPS <= action_component <=
+                self._action_bound + ACTION_EPS):
+          raise ValueError("{}th action {} out of bounds.".format(
+              i, action_component))
       action = self._apply_steering_to_locomotion(action)
       action = self.minitaur.ConvertFromLegModel(action)
     return action
@@ -119,7 +118,8 @@ class MinitaurBallGymEnv(minitaur_gym_env.MinitaurGymEnv):
     steering_amplitude = 0.5 * action[0]
     t = self.minitaur.GetTimeSinceReset()
     a1 = math.sin(t * speed) * (amplitude_swing + steering_amplitude)
-    a2 = math.sin(t * speed + math.pi) * (amplitude_swing - steering_amplitude)
+    a2 = math.sin(t * speed + math.pi) * \
+        (amplitude_swing - steering_amplitude)
     a3 = math.sin(t * speed) * amplitude_extension
     a4 = math.sin(t * speed + math.pi) * amplitude_extension
     action = [a1, a2, a2, a1, a3, a4, a4, a3]
@@ -130,8 +130,7 @@ class MinitaurBallGymEnv(minitaur_gym_env.MinitaurGymEnv):
         self._pybullet_client.getBasePositionAndOrientation(
             self.minitaur.quadruped))
     world_translation_ball, _ = (
-        self._pybullet_client.getBasePositionAndOrientation(
-            self._ball_id))
+        self._pybullet_client.getBasePositionAndOrientation(self._ball_id))
     distance = math.sqrt(
         (world_translation_ball[0] - world_translation_minitaur[0])**2 +
         (world_translation_ball[1] - world_translation_minitaur[1])**2)

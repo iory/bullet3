@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Utilities for the PPO algorithm."""
 
 from __future__ import absolute_import
@@ -29,12 +28,12 @@ from tensorflow.python.client import device_lib
 def create_nested_vars(tensors):
   """Create variables matching a nested tuple of tensors.
 
-  Args:
-    tensors: Nested tuple of list of tensors.
+    Args:
+      tensors: Nested tuple of list of tensors.
 
-  Returns:
-    Nested tuple or list of variables.
-  """
+    Returns:
+      Nested tuple or list of variables.
+    """
   if isinstance(tensors, (tuple, list)):
     return type(tensors)(create_nested_vars(tensor) for tensor in tensors)
   return tf.Variable(tensors, False)
@@ -43,16 +42,16 @@ def create_nested_vars(tensors):
 def reinit_nested_vars(variables, indices=None):
   """Reset all variables in a nested tuple to zeros.
 
-  Args:
-    variables: Nested tuple or list of variaables.
-    indices: Indices along the first dimension to reset, defaults to all.
+    Args:
+      variables: Nested tuple or list of variaables.
+      indices: Indices along the first dimension to reset, defaults to all.
 
-  Returns:
-    Operation.
-  """
+    Returns:
+      Operation.
+    """
   if isinstance(variables, (tuple, list)):
-    return tf.group(*[
-        reinit_nested_vars(variable, indices) for variable in variables])
+    return tf.group(
+        *[reinit_nested_vars(variable, indices) for variable in variables])
   if indices is None:
     return variables.assign(tf.zeros_like(variables))
   else:
@@ -63,17 +62,18 @@ def reinit_nested_vars(variables, indices=None):
 def assign_nested_vars(variables, tensors):
   """Assign tensors to matching nested tuple of variables.
 
-  Args:
-    variables: Nested tuple or list of variables to update.
-    tensors: Nested tuple or list of tensors to assign.
+    Args:
+      variables: Nested tuple or list of variables to update.
+      tensors: Nested tuple or list of tensors to assign.
 
-  Returns:
-    Operation.
-  """
+    Returns:
+      Operation.
+    """
   if isinstance(variables, (tuple, list)):
     return tf.group(*[
         assign_nested_vars(variable, tensor)
-        for variable, tensor in zip(variables, tensors)])
+        for variable, tensor in zip(variables, tensors)
+    ])
   return variables.assign(tensors)
 
 
@@ -81,10 +81,11 @@ def discounted_return(reward, length, discount):
   """Discounted Monte-Carlo returns."""
   timestep = tf.range(reward.shape[1].value)
   mask = tf.cast(timestep[None, :] < length[:, None], tf.float32)
-  return_ = tf.reverse(tf.transpose(tf.scan(
-      lambda agg, cur: cur + discount * agg,
-      tf.transpose(tf.reverse(mask * reward, [1]), [1, 0]),
-      tf.zeros_like(reward[:, -1]), 1, False), [1, 0]), [1])
+  return_ = tf.reverse(
+      tf.transpose(
+          tf.scan(lambda agg, cur: cur + discount * agg,
+                  tf.transpose(tf.reverse(mask * reward, [1]), [1, 0]),
+                  tf.zeros_like(reward[:, -1]), 1, False), [1, 0]), [1])
   return tf.check_numerics(tf.stop_gradient(return_), 'return')
 
 
@@ -97,8 +98,9 @@ def fixed_step_return(reward, value, length, discount, window):
     return_ += reward
     reward = discount * tf.concat(
         [reward[:, 1:], tf.zeros_like(reward[:, -1:])], 1)
-  return_ += discount ** window * tf.concat(
-      [value[:, window:], tf.zeros_like(value[:, -window:]), 1])
+  return_ += discount**window * tf.concat(
+      [value[:, window:],
+       tf.zeros_like(value[:, -window:]), 1])
   return tf.check_numerics(tf.stop_gradient(mask * return_), 'return')
 
 
@@ -109,10 +111,11 @@ def lambda_return(reward, value, length, discount, lambda_):
   sequence = mask * reward + discount * value * (1 - lambda_)
   discount = mask * discount * lambda_
   sequence = tf.stack([sequence, discount], 2)
-  return_ = tf.reverse(tf.transpose(tf.scan(
-      lambda agg, cur: cur[0] + cur[1] * agg,
-      tf.transpose(tf.reverse(sequence, [1]), [1, 2, 0]),
-      tf.zeros_like(value[:, -1]), 1, False), [1, 0]), [1])
+  return_ = tf.reverse(
+      tf.transpose(
+          tf.scan(lambda agg, cur: cur[0] + cur[1] * agg,
+                  tf.transpose(tf.reverse(sequence, [1]), [1, 2, 0]),
+                  tf.zeros_like(value[:, -1]), 1, False), [1, 0]), [1])
   return tf.check_numerics(tf.stop_gradient(return_), 'return')
 
 
@@ -122,27 +125,26 @@ def lambda_advantage(reward, value, length, discount):
   mask = tf.cast(timestep[None, :] < length[:, None], tf.float32)
   next_value = tf.concat([value[:, 1:], tf.zeros_like(value[:, -1:])], 1)
   delta = reward + discount * next_value - value
-  advantage = tf.reverse(tf.transpose(tf.scan(
-      lambda agg, cur: cur + discount * agg,
-      tf.transpose(tf.reverse(mask * delta, [1]), [1, 0]),
-      tf.zeros_like(delta[:, -1]), 1, False), [1, 0]), [1])
+  advantage = tf.reverse(
+      tf.transpose(
+          tf.scan(lambda agg, cur: cur + discount * agg,
+                  tf.transpose(tf.reverse(mask * delta, [1]), [1, 0]),
+                  tf.zeros_like(delta[:, -1]), 1, False), [1, 0]), [1])
   return tf.check_numerics(tf.stop_gradient(advantage), 'advantage')
 
 
 def diag_normal_kl(mean0, logstd0, mean1, logstd1):
   """Epirical KL divergence of two normals with diagonal covariance."""
   logstd0_2, logstd1_2 = 2 * logstd0, 2 * logstd1
-  return 0.5 * (
-      tf.reduce_sum(tf.exp(logstd0_2 - logstd1_2), -1) +
-      tf.reduce_sum((mean1 - mean0) ** 2 / tf.exp(logstd1_2), -1) +
-      tf.reduce_sum(logstd1_2, -1) - tf.reduce_sum(logstd0_2, -1) -
-      mean0.shape[-1].value)
+  return 0.5 * (tf.reduce_sum(tf.exp(logstd0_2 - logstd1_2), -1) + tf.reduce_sum(
+      (mean1 - mean0)**2 / tf.exp(logstd1_2), -1) + tf.reduce_sum(
+          logstd1_2, -1) - tf.reduce_sum(logstd0_2, -1) - mean0.shape[-1].value)
 
 
 def diag_normal_logpdf(mean, logstd, loc):
   """Log density of a normal with diagonal covariance."""
   constant = -0.5 * (math.log(2 * math.pi) + logstd)
-  value = -0.5 * ((loc - mean) / tf.exp(logstd)) ** 2
+  value = -0.5 * ((loc - mean) / tf.exp(logstd))**2
   return tf.reduce_sum(constant + value, -1)
 
 
@@ -161,16 +163,16 @@ def available_gpus():
 def gradient_summaries(grad_vars, groups=None, scope='gradients'):
   """Create histogram summaries of the gradient.
 
-  Summaries can be grouped via regexes matching variables names.
+    Summaries can be grouped via regexes matching variables names.
 
-  Args:
-    grad_vars: List of (gradient, variable) tuples as returned by optimizers.
-    groups: Mapping of name to regex for grouping summaries.
-    scope: Name scope for this operation.
+    Args:
+      grad_vars: List of (gradient, variable) tuples as returned by optimizers.
+      groups: Mapping of name to regex for grouping summaries.
+      scope: Name scope for this operation.
 
-  Returns:
-    Summary tensor.
-  """
+    Returns:
+      Summary tensor.
+    """
   groups = groups or {r'all': r'.*'}
   grouped = collections.defaultdict(list)
   for grad, var in grad_vars:
@@ -194,16 +196,16 @@ def gradient_summaries(grad_vars, groups=None, scope='gradients'):
 def variable_summaries(vars_, groups=None, scope='weights'):
   """Create histogram summaries for the provided variables.
 
-  Summaries can be grouped via regexes matching variables names.
+    Summaries can be grouped via regexes matching variables names.
 
-  Args:
-    vars_: List of variables to summarize.
-    groups: Mapping of name to regex for grouping summaries.
-    scope: Name scope for this operation.
+    Args:
+      vars_: List of variables to summarize.
+      groups: Mapping of name to regex for grouping summaries.
+      scope: Name scope for this operation.
 
-  Returns:
-    Summary tensor.
-  """
+    Returns:
+      Summary tensor.
+    """
   groups = groups or {r'all': r'.*'}
   grouped = collections.defaultdict(list)
   for var in vars_:

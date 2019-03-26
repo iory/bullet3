@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Mock algorithm for testing reinforcement learning code."""
 
 from __future__ import absolute_import
@@ -27,16 +26,17 @@ class MockAlgorithm(object):
   def __init__(self, envs):
     """Produce random actions and empty summaries.
 
-    Args:
-      envs: List of in-graph environments.
-    """
+        Args:
+          envs: List of in-graph environments.
+        """
     self._envs = envs
 
   def begin_episode(self, unused_agent_indices):
     return tf.constant('')
 
   def perform(self, agent_indices, unused_observ):
-    shape = (tf.shape(agent_indices)[0],) + self._envs[0].action_space.shape
+    shape = (tf.shape(agent_indices)[0],) + \
+        self._envs[0].action_space.shape
     low = self._envs[0].action_space.low
     high = self._envs[0].action_space.high
     action = tf.random_uniform(shape) * (high - low) + low

@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Mock algorithm for testing reinforcement learning code."""
 
 from __future__ import absolute_import
@@ -27,9 +26,9 @@ class MockAlgorithm(object):
   def __init__(self, envs):
     """Produce random actions and empty summaries.
 
-    Args:
-      envs: List of in-graph environments.
-    """
+        Args:
+          envs: List of in-graph environments.
+        """
     self._envs = envs
 
   def begin_episode(self, unused_agent_indices):

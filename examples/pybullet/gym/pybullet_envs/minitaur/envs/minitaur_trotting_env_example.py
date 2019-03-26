@@ -13,7 +13,8 @@ from pybullet_envs.minitaur.envs import simple_ppo_agent
 
 flags = tf.app.flags
 FLAGS = tf.app.flags.FLAGS
-LOG_DIR = os.path.join(pybullet_data.getDataPath(), "policies/ppo/minitaur_trotting_env")
+LOG_DIR = os.path.join(pybullet_data.getDataPath(),
+                       "policies/ppo/minitaur_trotting_env")
 CHECKPOINT = "model.ckpt-14000000"
 
 
@@ -48,4 +49,3 @@ def main(argv):
 
 if __name__ == "__main__":
   tf.app.run(main)
-

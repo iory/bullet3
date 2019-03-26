@@ -1,20 +1,18 @@
-#The example to run the raibert controller in a Minitaur gym env.
+# The example to run the raibert controller in a Minitaur gym env.
 
-
+from pybullet_envs.minitaur.envs import minitaur_gym_env
+from pybullet_envs.minitaur.envs import minitaur_raibert_controller
+import tensorflow as tf
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import os
 import inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(os.path.dirname(currentdir)))
-os.sys.path.insert(0,parentdir)
-
-
-import tensorflow as tf
-from pybullet_envs.minitaur.envs import minitaur_raibert_controller
-from pybullet_envs.minitaur.envs import minitaur_gym_env
+os.sys.path.insert(0, parentdir)
 
 flags = tf.app.flags
 FLAGS = tf.app.flags.FLAGS
@@ -69,6 +67,6 @@ def main(argv):
   finally:
     env.close()
 
+
 if __name__ == "__main__":
   tf.app.run(main)
-

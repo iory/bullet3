@@ -1,16 +1,17 @@
+from pybullet_envs.minitaur.envs import minitaur_gym_env
+import numpy as np
+from gym import spaces
 """This file implements the gym environment of minitaur alternating legs.
 
 """
 import math
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
-
-from gym import spaces
-import numpy as np
-from pybullet_envs.minitaur.envs import minitaur_gym_env
+os.sys.path.insert(0, parentdir)
 
 INIT_EXTENSION_POS = 2.6
 INIT_SWING_POS = 0.0
@@ -24,13 +25,13 @@ STEP_AMPLITUDE = 0.75
 class MinitaurAlternatingLegsEnv(minitaur_gym_env.MinitaurGymEnv):
   """The gym environment for the minitaur.
 
-  It simulates the locomotion of a minitaur, a quadruped robot. The state space
-  include the angles, velocities and torques for all the motors and the action
-  space is the desired motor angle for each motor. The reward function is based
-  on how far the minitaur walks in 1000 steps and penalizes the energy
-  expenditure.
+    It simulates the locomotion of a minitaur, a quadruped robot. The state space
+    include the angles, velocities and torques for all the motors and the action
+    space is the desired motor angle for each motor. The reward function is based
+    on how far the minitaur walks in 1000 steps and penalizes the energy
+    expenditure.
 
-  """
+    """
   metadata = {
       "render.modes": ["human", "rgb_array"],
       "video.frames_per_second": 66
@@ -52,32 +53,32 @@ class MinitaurAlternatingLegsEnv(minitaur_gym_env.MinitaurGymEnv):
                log_path=None):
     """Initialize the minitaur alternating legs gym environment.
 
-    Args:
-      urdf_version: [DEFAULT_URDF_VERSION, DERPY_V0_URDF_VERSION] are allowable
-        versions. If None, DEFAULT_URDF_VERSION is used. Refer to
-        minitaur_gym_env for more details.
-      control_time_step: The time step between two successive control signals.
-      action_repeat: The number of simulation steps that an action is repeated.
-      control_latency: The latency between get_observation() and the actual
-        observation. See minituar.py for more details.
-      pd_latency: The latency used to get motor angles/velocities used to
-        compute PD controllers. See minitaur.py for more details.
-      on_rack: Whether to place the minitaur on rack. This is only used to debug
-        the walking gait. In this mode, the minitaur's base is hung midair so
-        that its walking gait is clearer to visualize.
-      motor_kp: The P gain of the motor.
-      motor_kd: The D gain of the motor.
-      remove_default_joint_damping: Whether to remove the default joint damping.
-      render: Whether to render the simulation.
-      num_steps_to_log: The max number of control steps in one episode. If the
-        number of steps is over num_steps_to_log, the environment will still
-        be running, but only first num_steps_to_log will be recorded in logging.
-      env_randomizer: An instance (or a list) of EnvRanzomier(s) that can
-        randomize the environment during when env.reset() is called and add
-        perturbations when env.step() is called.
-      log_path: The path to write out logs. For the details of logging, refer to
-        minitaur_logging.proto.
-    """
+        Args:
+          urdf_version: [DEFAULT_URDF_VERSION, DERPY_V0_URDF_VERSION] are allowable
+            versions. If None, DEFAULT_URDF_VERSION is used. Refer to
+            minitaur_gym_env for more details.
+          control_time_step: The time step between two successive control signals.
+          action_repeat: The number of simulation steps that an action is repeated.
+          control_latency: The latency between get_observation() and the actual
+            observation. See minituar.py for more details.
+          pd_latency: The latency used to get motor angles/velocities used to
+            compute PD controllers. See minitaur.py for more details.
+          on_rack: Whether to place the minitaur on rack. This is only used to debug
+            the walking gait. In this mode, the minitaur's base is hung midair so
+            that its walking gait is clearer to visualize.
+          motor_kp: The P gain of the motor.
+          motor_kd: The D gain of the motor.
+          remove_default_joint_damping: Whether to remove the default joint damping.
+          render: Whether to render the simulation.
+          num_steps_to_log: The max number of control steps in one episode. If the
+            number of steps is over num_steps_to_log, the environment will still
+            be running, but only first num_steps_to_log will be recorded in logging.
+          env_randomizer: An instance (or a list) of EnvRanzomier(s) that can
+            randomize the environment during when env.reset() is called and add
+            perturbations when env.step() is called.
+          log_path: The path to write out logs. For the details of logging, refer to
+            minitaur_logging.proto.
+        """
     # _swing_offset and _extension_offset is to mimick the bent legs.
     self._swing_offset = np.zeros(NUM_LEGS)
     self._extension_offset = np.zeros(NUM_LEGS)
@@ -130,9 +131,10 @@ class MinitaurAlternatingLegsEnv(minitaur_gym_env.MinitaurGymEnv):
   def _convert_from_leg_model(self, leg_pose):
     motor_pose = np.zeros(NUM_MOTORS)
     for i in range(NUM_LEGS):
-      motor_pose[2 * i] = leg_pose[NUM_LEGS + i] - (-1)**(i / 2) * leg_pose[i]
-      motor_pose[2 * i
-                 + 1] = leg_pose[NUM_LEGS + i] + (-1)**(i / 2) * leg_pose[i]
+      motor_pose[2 * i] = leg_pose[NUM_LEGS + i] - \
+          (-1)**(i / 2) * leg_pose[i]
+      motor_pose[2 * i +
+                 1] = leg_pose[NUM_LEGS + i] + (-1)**(i / 2) * leg_pose[i]
     return motor_pose
 
   def _signal(self, t):
@@ -164,12 +166,12 @@ class MinitaurAlternatingLegsEnv(minitaur_gym_env.MinitaurGymEnv):
   def is_fallen(self):
     """Decide whether the minitaur has fallen.
 
-    If the up directions between the base and the world is large (the dot
-    product is smaller than 0.85), the minitaur is considered fallen.
+        If the up directions between the base and the world is large (the dot
+        product is smaller than 0.85), the minitaur is considered fallen.
 
-    Returns:
-      Boolean value that indicates whether the minitaur has fallen.
-    """
+        Returns:
+          Boolean value that indicates whether the minitaur has fallen.
+        """
     orientation = self.minitaur.GetBaseOrientation()
     rot_mat = self._pybullet_client.getMatrixFromQuaternion(orientation)
     local_up = rot_mat[6:]
@@ -181,12 +183,12 @@ class MinitaurAlternatingLegsEnv(minitaur_gym_env.MinitaurGymEnv):
   def _get_true_observation(self):
     """Get the true observations of this environment.
 
-    It includes the roll, the error between current pitch and desired pitch,
-    roll dot and pitch dot of the base.
+        It includes the roll, the error between current pitch and desired pitch,
+        roll dot and pitch dot of the base.
 
-    Returns:
-      The observation list.
-    """
+        Returns:
+          The observation list.
+        """
     observation = []
     roll, pitch, _ = self.minitaur.GetTrueBaseRollPitchYaw()
     roll_rate, pitch_rate, _ = self.minitaur.GetTrueBaseRollPitchYawRate()
@@ -207,13 +209,14 @@ class MinitaurAlternatingLegsEnv(minitaur_gym_env.MinitaurGymEnv):
   def _get_observation_upper_bound(self):
     """Get the upper bound of the observation.
 
-    Returns:
-      The upper bound of an observation. See GetObservation() for the details
-        of each element of an observation.
-    """
+        Returns:
+          The upper bound of an observation. See GetObservation() for the details
+            of each element of an observation.
+        """
     upper_bound = np.zeros(self._get_observation_dimension())
     upper_bound[0:2] = 2 * math.pi  # Roll, pitch, yaw of the base.
-    upper_bound[2:4] = 2 * math.pi / self._time_step  # Roll, pitch, yaw rate.
+    # Roll, pitch, yaw rate.
+    upper_bound[2:4] = 2 * math.pi / self._time_step
     return upper_bound
 
   def _get_observation_lower_bound(self):
@@ -223,27 +226,27 @@ class MinitaurAlternatingLegsEnv(minitaur_gym_env.MinitaurGymEnv):
   def set_swing_offset(self, value):
     """Set the swing offset of each leg.
 
-    It is to mimic the bent leg.
+        It is to mimic the bent leg.
 
-    Args:
-      value: A list of four values.
-    """
+        Args:
+          value: A list of four values.
+        """
     self._swing_offset = value
 
   def set_extension_offset(self, value):
     """Set the extension offset of each leg.
 
-    It is to mimic the bent leg.
+        It is to mimic the bent leg.
 
-    Args:
-      value: A list of four values.
-    """
+        Args:
+          value: A list of four values.
+        """
     self._extension_offset = value
 
   def set_desired_pitch(self, value):
     """Set the desired pitch of the base, which is a user input.
 
-    Args:
-      value: A scalar.
-    """
+        Args:
+          value: A scalar.
+        """
     self.desired_pitch = value

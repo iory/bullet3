@@ -38,17 +38,18 @@ def motor_angles_to_leg_pose(motor_angles):
   for i in range(_NUM_LEGS):
     leg_pose[i] = 0.5 * (-1)**(i // 2) * (
         motor_angles[2 * i + 1] - motor_angles[2 * i])
-    leg_pose[_NUM_LEGS + i] = 0.5 * (
-        motor_angles[2 * i] + motor_angles[2 * i + 1])
+    leg_pose[_NUM_LEGS +
+             i] = 0.5 * (motor_angles[2 * i] + motor_angles[2 * i + 1])
   return leg_pose
 
 
 def leg_pose_to_motor_angles(leg_pose):
   motor_pose = np.zeros(_NUM_MOTORS)
   for i in range(_NUM_LEGS):
-    motor_pose[2 * i] = leg_pose[_NUM_LEGS + i] - (-1)**(i // 2) * leg_pose[i]
-    motor_pose[2 * i + 1] = (
-        leg_pose[_NUM_LEGS + i] + (-1)**(i // 2) * leg_pose[i])
+    motor_pose[2 * i] = leg_pose[_NUM_LEGS + i] - \
+        (-1)**(i // 2) * leg_pose[i]
+    motor_pose[2 * i + 1] = (leg_pose[_NUM_LEGS + i] + (-1)**
+                             (i // 2) * leg_pose[i])
   return motor_pose
 
 
@@ -98,8 +99,8 @@ def foot_horizontal_position_to_leg_swing(foot_horizontal_position,
                                           leg_extension):
   """Computes the target leg swing.
 
-  Sometimes it is more convenient to plan in the hybrid space.
-  """
+    Sometimes it is more convenient to plan in the hybrid space.
+    """
 
   l1 = _UPPER_LEG_LEN
   l2 = _LOWER_SHORT_LEG_LEN
@@ -171,9 +172,8 @@ def generate_swing_trajectory(phase, init_pose, end_pose):
 
   b = (phi * phi * delta_2 - delta_1) / delta_p
 
-  delta = (
-      a * normalized_phase * normalized_phase + b * normalized_phase +
-      init_delta)
+  delta = (a * normalized_phase * normalized_phase + b * normalized_phase +
+           init_delta)
 
   l1 = _UPPER_LEG_LEN
   l2 = _LOWER_SHORT_LEG_LEN
@@ -221,9 +221,8 @@ class RaibertSwingLegController(object):
       # 3) Find the next leg pose on the curve based on how much time left.
 
       # 1) Convert the target foot
-      target_leg_extension = (
-          raibiert_controller.nominal_leg_extension -
-          self._leg_extension_clearance)
+      target_leg_extension = (raibiert_controller.nominal_leg_extension -
+                              self._leg_extension_clearance)
       target_leg_swing = foot_horizontal_position_to_leg_swing(
           target_foot_horizontal_position, leg_extension=target_leg_extension)
 

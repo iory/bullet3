@@ -1,28 +1,29 @@
+from pkg_resources import parse_version
+from pybullet_envs.minitaur.envs import motor
+from pybullet_envs.minitaur.envs import minitaur_rainbow_dash
+from pybullet_envs.minitaur.envs import minitaur_logging_pb2
+from pybullet_envs.minitaur.envs import minitaur_logging
+from pybullet_envs.minitaur.envs import minitaur_derpy
+from pybullet_envs.minitaur.envs import minitaur
+import pybullet_data
+from pybullet_envs.minitaur.envs import bullet_client
+import pybullet
+import numpy as np
+from gym.utils import seeding
+from gym import spaces
+import gym
 """This file implements the gym environment of minitaur.
 
 """
 import math
 import time
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
-
-import gym
-from gym import spaces
-from gym.utils import seeding
-import numpy as np
-import pybullet
-from pybullet_envs.minitaur.envs import bullet_client
-import pybullet_data
-from pybullet_envs.minitaur.envs import minitaur
-from pybullet_envs.minitaur.envs import minitaur_derpy
-from pybullet_envs.minitaur.envs import minitaur_logging
-from pybullet_envs.minitaur.envs import minitaur_logging_pb2
-from pybullet_envs.minitaur.envs import minitaur_rainbow_dash
-from pybullet_envs.minitaur.envs import motor
-from pkg_resources import parse_version
+os.sys.path.insert(0, parentdir)
 
 NUM_MOTORS = 8
 MOTOR_ANGLE_OBSERVATION_INDEX = 0
@@ -57,13 +58,13 @@ def convert_to_list(obj):
 class MinitaurGymEnv(gym.Env):
   """The gym environment for the minitaur.
 
-  It simulates the locomotion of a minitaur, a quadruped robot. The state space
-  include the angles, velocities and torques for all the motors and the action
-  space is the desired motor angle for each motor. The reward function is based
-  on how far the minitaur walks in 1000 steps and penalizes the energy
-  expenditure.
+    It simulates the locomotion of a minitaur, a quadruped robot. The state space
+    include the angles, velocities and torques for all the motors and the action
+    space is the desired motor angle for each motor. The reward function is based
+    on how far the minitaur walks in 1000 steps and penalizes the energy
+    expenditure.
 
-  """
+    """
   metadata = {
       "render.modes": ["human", "rgb_array"],
       "video.frames_per_second": 100
@@ -102,70 +103,70 @@ class MinitaurGymEnv(gym.Env):
                log_path=None):
     """Initialize the minitaur gym environment.
 
-    Args:
-      urdf_root: The path to the urdf data folder.
-      urdf_version: [DEFAULT_URDF_VERSION, DERPY_V0_URDF_VERSION,
-        RAINBOW_DASH_V0_URDF_VERSION] are allowable
-        versions. If None, DEFAULT_URDF_VERSION is used. DERPY_V0_URDF_VERSION
-        is the result of first pass system identification for derpy.
-        We will have a different URDF and related Minitaur class each time we
-        perform system identification. While the majority of the code of the
-        class remains the same, some code changes (e.g. the constraint location
-        might change). __init__() will choose the right Minitaur class from
-        different minitaur modules based on
-        urdf_version.
-      distance_weight: The weight of the distance term in the reward.
-      energy_weight: The weight of the energy term in the reward.
-      shake_weight: The weight of the vertical shakiness term in the reward.
-      drift_weight: The weight of the sideways drift term in the reward.
-      distance_limit: The maximum distance to terminate the episode.
-      observation_noise_stdev: The standard deviation of observation noise.
-      self_collision_enabled: Whether to enable self collision in the sim.
-      motor_velocity_limit: The velocity limit of each motor.
-      pd_control_enabled: Whether to use PD controller for each motor.
-      leg_model_enabled: Whether to use a leg motor to reparameterize the action
-        space.
-      accurate_motor_model_enabled: Whether to use the accurate DC motor model.
-      remove_default_joint_damping: Whether to remove the default joint damping.
-      motor_kp: proportional gain for the accurate motor model.
-      motor_kd: derivative gain for the accurate motor model.
-      control_latency: It is the delay in the controller between when an
-        observation is made at some point, and when that reading is reported
-        back to the Neural Network.
-      pd_latency: latency of the PD controller loop. PD calculates PWM based on
-        the motor angle and velocity. The latency measures the time between when
-        the motor angle and velocity are observed on the microcontroller and
-        when the true state happens on the motor. It is typically (0.001-
-        0.002s).
-      torque_control_enabled: Whether to use the torque control, if set to
-        False, pose control will be used.
-      motor_overheat_protection: Whether to shutdown the motor that has exerted
-        large torque (OVERHEAT_SHUTDOWN_TORQUE) for an extended amount of time
-        (OVERHEAT_SHUTDOWN_TIME). See ApplyAction() in minitaur.py for more
-        details.
-      hard_reset: Whether to wipe the simulation and load everything when reset
-        is called. If set to false, reset just place the minitaur back to start
-        position and set its pose to initial configuration.
-      on_rack: Whether to place the minitaur on rack. This is only used to debug
-        the walking gait. In this mode, the minitaur's base is hanged midair so
-        that its walking gait is clearer to visualize.
-      render: Whether to render the simulation.
-      num_steps_to_log: The max number of control steps in one episode that will
-        be logged. If the number of steps is more than num_steps_to_log, the
-        environment will still be running, but only first num_steps_to_log will
-        be recorded in logging.
-      action_repeat: The number of simulation steps before actions are applied.
-      control_time_step: The time step between two successive control signals.
-      env_randomizer: An instance (or a list) of EnvRandomizer(s). An
-        EnvRandomizer may randomize the physical property of minitaur, change
-          the terrrain during reset(), or add perturbation forces during step().
-      forward_reward_cap: The maximum value that forward reward is capped at.
-        Disabled (Inf) by default.
-      log_path: The path to write out logs. For the details of logging, refer to
-        minitaur_logging.proto.
-    Raises:
-      ValueError: If the urdf_version is not supported.
-    """
+        Args:
+          urdf_root: The path to the urdf data folder.
+          urdf_version: [DEFAULT_URDF_VERSION, DERPY_V0_URDF_VERSION,
+            RAINBOW_DASH_V0_URDF_VERSION] are allowable
+            versions. If None, DEFAULT_URDF_VERSION is used. DERPY_V0_URDF_VERSION
+            is the result of first pass system identification for derpy.
+            We will have a different URDF and related Minitaur class each time we
+            perform system identification. While the majority of the code of the
+            class remains the same, some code changes (e.g. the constraint location
+            might change). __init__() will choose the right Minitaur class from
+            different minitaur modules based on
+            urdf_version.
+          distance_weight: The weight of the distance term in the reward.
+          energy_weight: The weight of the energy term in the reward.
+          shake_weight: The weight of the vertical shakiness term in the reward.
+          drift_weight: The weight of the sideways drift term in the reward.
+          distance_limit: The maximum distance to terminate the episode.
+          observation_noise_stdev: The standard deviation of observation noise.
+          self_collision_enabled: Whether to enable self collision in the sim.
+          motor_velocity_limit: The velocity limit of each motor.
+          pd_control_enabled: Whether to use PD controller for each motor.
+          leg_model_enabled: Whether to use a leg motor to reparameterize the action
+            space.
+          accurate_motor_model_enabled: Whether to use the accurate DC motor model.
+          remove_default_joint_damping: Whether to remove the default joint damping.
+          motor_kp: proportional gain for the accurate motor model.
+          motor_kd: derivative gain for the accurate motor model.
+          control_latency: It is the delay in the controller between when an
+            observation is made at some point, and when that reading is reported
+            back to the Neural Network.
+          pd_latency: latency of the PD controller loop. PD calculates PWM based on
+            the motor angle and velocity. The latency measures the time between when
+            the motor angle and velocity are observed on the microcontroller and
+            when the true state happens on the motor. It is typically (0.001-
+            0.002s).
+          torque_control_enabled: Whether to use the torque control, if set to
+            False, pose control will be used.
+          motor_overheat_protection: Whether to shutdown the motor that has exerted
+            large torque (OVERHEAT_SHUTDOWN_TORQUE) for an extended amount of time
+            (OVERHEAT_SHUTDOWN_TIME). See ApplyAction() in minitaur.py for more
+            details.
+          hard_reset: Whether to wipe the simulation and load everything when reset
+            is called. If set to false, reset just place the minitaur back to start
+            position and set its pose to initial configuration.
+          on_rack: Whether to place the minitaur on rack. This is only used to debug
+            the walking gait. In this mode, the minitaur's base is hanged midair so
+            that its walking gait is clearer to visualize.
+          render: Whether to render the simulation.
+          num_steps_to_log: The max number of control steps in one episode that will
+            be logged. If the number of steps is more than num_steps_to_log, the
+            environment will still be running, but only first num_steps_to_log will
+            be recorded in logging.
+          action_repeat: The number of simulation steps before actions are applied.
+          control_time_step: The time step between two successive control signals.
+          env_randomizer: An instance (or a list) of EnvRandomizer(s). An
+            EnvRandomizer may randomize the physical property of minitaur, change
+              the terrrain during reset(), or add perturbation forces during step().
+          forward_reward_cap: The maximum value that forward reward is capped at.
+            Disabled (Inf) by default.
+          log_path: The path to write out logs. For the details of logging, refer to
+            minitaur_logging.proto.
+        Raises:
+          ValueError: If the urdf_version is not supported.
+        """
     # Set up logging.
     self._log_path = log_path
     self.logging = minitaur_logging.MinitaurLogging(log_path)
@@ -270,8 +271,10 @@ class MinitaurGymEnv(gym.Env):
       self._ground_id = self._pybullet_client.loadURDF(
           "%s/plane.urdf" % self._urdf_root)
       if (self._reflection):
-        self._pybullet_client.changeVisualShape(self._ground_id,-1,rgbaColor=[1,1,1,0.8])
-        self._pybullet_client.configureDebugVisualizer(self._pybullet_client.COV_ENABLE_PLANAR_REFLECTION,self._ground_id)
+        self._pybullet_client.changeVisualShape(
+            self._ground_id, -1, rgbaColor=[1, 1, 1, 0.8])
+        self._pybullet_client.configureDebugVisualizer(
+            self._pybullet_client.COV_ENABLE_PLANAR_REFLECTION, self._ground_id)
       self._pybullet_client.setGravity(0, 0, -10)
       acc_motor = self._accurate_motor_model_enabled
       motor_protect = self._motor_overheat_protection
@@ -279,25 +282,24 @@ class MinitaurGymEnv(gym.Env):
         raise ValueError(
             "%s is not a supported urdf_version." % self._urdf_version)
       else:
-        self.minitaur = (
-            MINIATUR_URDF_VERSION_MAP[self._urdf_version](
-                pybullet_client=self._pybullet_client,
-                action_repeat=self._action_repeat,
-                urdf_root=self._urdf_root,
-                time_step=self._time_step,
-                self_collision_enabled=self._self_collision_enabled,
-                motor_velocity_limit=self._motor_velocity_limit,
-                pd_control_enabled=self._pd_control_enabled,
-                accurate_motor_model_enabled=acc_motor,
-                remove_default_joint_damping=self._remove_default_joint_damping,
-                motor_kp=self._motor_kp,
-                motor_kd=self._motor_kd,
-                control_latency=self._control_latency,
-                pd_latency=self._pd_latency,
-                observation_noise_stdev=self._observation_noise_stdev,
-                torque_control_enabled=self._torque_control_enabled,
-                motor_overheat_protection=motor_protect,
-                on_rack=self._on_rack))
+        self.minitaur = (MINIATUR_URDF_VERSION_MAP[self._urdf_version](
+            pybullet_client=self._pybullet_client,
+            action_repeat=self._action_repeat,
+            urdf_root=self._urdf_root,
+            time_step=self._time_step,
+            self_collision_enabled=self._self_collision_enabled,
+            motor_velocity_limit=self._motor_velocity_limit,
+            pd_control_enabled=self._pd_control_enabled,
+            accurate_motor_model_enabled=acc_motor,
+            remove_default_joint_damping=self._remove_default_joint_damping,
+            motor_kp=self._motor_kp,
+            motor_kd=self._motor_kd,
+            control_latency=self._control_latency,
+            pd_latency=self._pd_latency,
+            observation_noise_stdev=self._observation_noise_stdev,
+            torque_control_enabled=self._torque_control_enabled,
+            motor_overheat_protection=motor_protect,
+            on_rack=self._on_rack))
     self.minitaur.Reset(
         reload_urdf=False,
         default_motor_angles=initial_motor_angles,
@@ -334,19 +336,19 @@ class MinitaurGymEnv(gym.Env):
   def step(self, action):
     """Step forward the simulation, given the action.
 
-    Args:
-      action: A list of desired motor angles for eight motors.
+        Args:
+          action: A list of desired motor angles for eight motors.
 
-    Returns:
-      observations: The angles, velocities and torques of all motors.
-      reward: The reward for the current state-action pair.
-      done: Whether the episode has ended.
-      info: A dictionary that stores diagnostic information.
+        Returns:
+          observations: The angles, velocities and torques of all motors.
+          reward: The reward for the current state-action pair.
+          done: Whether the episode has ended.
+          info: A dictionary that stores diagnostic information.
 
-    Raises:
-      ValueError: The action dimension is not the same as the number of motors.
-      ValueError: The magnitude of actions is out of bounds.
-    """
+        Raises:
+          ValueError: The action dimension is not the same as the number of motors.
+          ValueError: The magnitude of actions is out of bounds.
+        """
     self._last_base_position = self.minitaur.GetBasePosition()
 
     if self._is_render:
@@ -408,9 +410,9 @@ class MinitaurGymEnv(gym.Env):
   def get_minitaur_motor_angles(self):
     """Get the minitaur's motor angles.
 
-    Returns:
-      A numpy array of motor angles.
-    """
+        Returns:
+          A numpy array of motor angles.
+        """
     return np.array(
         self._observation[MOTOR_ANGLE_OBSERVATION_INDEX:
                           MOTOR_ANGLE_OBSERVATION_INDEX + NUM_MOTORS])
@@ -418,9 +420,9 @@ class MinitaurGymEnv(gym.Env):
   def get_minitaur_motor_velocities(self):
     """Get the minitaur's motor velocities.
 
-    Returns:
-      A numpy array of motor velocities.
-    """
+        Returns:
+          A numpy array of motor velocities.
+        """
     return np.array(
         self._observation[MOTOR_VELOCITY_OBSERVATION_INDEX:
                           MOTOR_VELOCITY_OBSERVATION_INDEX + NUM_MOTORS])
@@ -428,9 +430,9 @@ class MinitaurGymEnv(gym.Env):
   def get_minitaur_motor_torques(self):
     """Get the minitaur's motor torques.
 
-    Returns:
-      A numpy array of motor torques.
-    """
+        Returns:
+          A numpy array of motor torques.
+        """
     return np.array(
         self._observation[MOTOR_TORQUE_OBSERVATION_INDEX:
                           MOTOR_TORQUE_OBSERVATION_INDEX + NUM_MOTORS])
@@ -438,21 +440,21 @@ class MinitaurGymEnv(gym.Env):
   def get_minitaur_base_orientation(self):
     """Get the minitaur's base orientation, represented by a quaternion.
 
-    Returns:
-      A numpy array of minitaur's orientation.
-    """
+        Returns:
+          A numpy array of minitaur's orientation.
+        """
     return np.array(self._observation[BASE_ORIENTATION_OBSERVATION_INDEX:])
 
   def is_fallen(self):
     """Decide whether the minitaur has fallen.
 
-    If the up directions between the base and the world is larger (the dot
-    product is smaller than 0.85) or the base is very low on the ground
-    (the height is smaller than 0.13 meter), the minitaur is considered fallen.
+        If the up directions between the base and the world is larger (the dot
+        product is smaller than 0.85) or the base is very low on the ground
+        (the height is smaller than 0.13 meter), the minitaur is considered fallen.
 
-    Returns:
-      Boolean value that indicates whether the minitaur has fallen.
-    """
+        Returns:
+          Boolean value that indicates whether the minitaur has fallen.
+        """
     orientation = self.minitaur.GetBaseOrientation()
     rot_mat = self._pybullet_client.getMatrixFromQuaternion(orientation)
     local_up = rot_mat[6:]
@@ -471,12 +473,14 @@ class MinitaurGymEnv(gym.Env):
     # Cap the forward reward if a cap is set.
     forward_reward = min(forward_reward, self._forward_reward_cap)
     # Penalty for sideways translation.
-    drift_reward = -abs(current_base_position[1] - self._last_base_position[1])
+    drift_reward = - \
+        abs(current_base_position[1] - self._last_base_position[1])
     # Penalty for sideways rotation of the body.
     orientation = self.minitaur.GetBaseOrientation()
     rot_matrix = pybullet.getMatrixFromQuaternion(orientation)
     local_up_vec = rot_matrix[6:]
-    shake_reward = -abs(np.dot(np.asarray([1, 1, 0]), np.asarray(local_up_vec)))
+    shake_reward = - \
+        abs(np.dot(np.asarray([1, 1, 0]), np.asarray(local_up_vec)))
     energy_reward = -np.abs(
         np.dot(self.minitaur.GetMotorTorques(),
                self.minitaur.GetMotorVelocities())) * self._time_step
@@ -495,23 +499,23 @@ class MinitaurGymEnv(gym.Env):
   def objective_weights(self):
     """Accessor for the weights for all the objectives.
 
-    Returns:
-      List of floating points that corresponds to weights for the objectives in
-      the order that objectives are stored.
-    """
+        Returns:
+          List of floating points that corresponds to weights for the objectives in
+          the order that objectives are stored.
+        """
     return self._objective_weights
 
   def _get_observation(self):
     """Get observation of this environment, including noise and latency.
 
-    The minitaur class maintains a history of true observations. Based on the
-    latency, this function will find the observation at the right time,
-    interpolate if necessary. Then Gaussian noise is added to this observation
-    based on self.observation_noise_stdev.
+        The minitaur class maintains a history of true observations. Based on the
+        latency, this function will find the observation at the right time,
+        interpolate if necessary. Then Gaussian noise is added to this observation
+        based on self.observation_noise_stdev.
 
-    Returns:
-      The noisy observation with latency.
-    """
+        Returns:
+          The noisy observation with latency.
+        """
 
     observation = []
     observation.extend(self.minitaur.GetMotorAngles().tolist())
@@ -524,13 +528,13 @@ class MinitaurGymEnv(gym.Env):
   def _get_true_observation(self):
     """Get the observations of this environment.
 
-    It includes the angles, velocities, torques and the orientation of the base.
+        It includes the angles, velocities, torques and the orientation of the base.
 
-    Returns:
-      The observation list. observation[0:8] are motor angles. observation[8:16]
-      are motor velocities, observation[16:24] are motor torques.
-      observation[24:28] is the orientation of the base, in quaternion form.
-    """
+        Returns:
+          The observation list. observation[0:8] are motor angles. observation[8:16]
+          are motor velocities, observation[16:24] are motor torques.
+          observation[24:28] is the orientation of the base, in quaternion form.
+        """
     observation = []
     observation.extend(self.minitaur.GetTrueMotorAngles().tolist())
     observation.extend(self.minitaur.GetTrueMotorVelocities().tolist())
@@ -543,10 +547,10 @@ class MinitaurGymEnv(gym.Env):
   def _get_observation_upper_bound(self):
     """Get the upper bound of the observation.
 
-    Returns:
-      The upper bound of an observation. See GetObservation() for the details
-        of each element of an observation.
-    """
+        Returns:
+          The upper bound of an observation. See GetObservation() for the details
+            of each element of an observation.
+        """
     upper_bound = np.zeros(self._get_observation_dimension())
     num_motors = self.minitaur.num_motors
     upper_bound[0:num_motors] = math.pi  # Joint angle.
@@ -564,9 +568,9 @@ class MinitaurGymEnv(gym.Env):
   def _get_observation_dimension(self):
     """Get the length of the observation list.
 
-    Returns:
-      The length of the observation list.
-    """
+        Returns:
+          The length of the observation list.
+        """
     return len(self._get_observation())
 
   if parse_version(gym.__version__) < parse_version('0.9.6'):
@@ -575,19 +579,18 @@ class MinitaurGymEnv(gym.Env):
     _seed = seed
     _step = step
 
-
   def set_time_step(self, control_step, simulation_step=0.001):
     """Sets the time step of the environment.
 
-    Args:
-      control_step: The time period (in seconds) between two adjacent control
-        actions are applied.
-      simulation_step: The simulation time step in PyBullet. By default, the
-        simulation step is 0.001s, which is a good trade-off between simulation
-        speed and accuracy.
-    Raises:
-      ValueError: If the control step is smaller than the simulation step.
-    """
+        Args:
+          control_step: The time period (in seconds) between two adjacent control
+            actions are applied.
+          simulation_step: The simulation time step in PyBullet. By default, the
+            simulation step is 0.001s, which is a good trade-off between simulation
+            speed and accuracy.
+        Raises:
+          ValueError: If the control step is smaller than the simulation step.
+        """
     if control_step < simulation_step:
       raise ValueError(
           "Control step should be larger than or equal to simulation step.")

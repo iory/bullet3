@@ -8,10 +8,10 @@ import numpy as np
 from pybullet_envs.minitaur.envs import minitaur
 from pybullet_envs.minitaur.envs import minitaur_gym_env
 
-#flags.DEFINE_string(
+# flags.DEFINE_string(
 #    'terrain_dir', '/cns/od-d/home/brain-minitaur/terrain_obj',
 #    'The directory which contains terrain obj files to be used.')
-#flags.DEFINE_string('storage_dir', '/tmp',
+# flags.DEFINE_string('storage_dir', '/tmp',
 #                    'The full path to the temporary directory to be used.')
 #FLAGS = flags.FLAGS
 
@@ -19,13 +19,13 @@ from pybullet_envs.minitaur.envs import minitaur_gym_env
 class MinitaurRandomizeTerrainGymEnv(minitaur_gym_env.MinitaurGymEnv):
   """The gym environment for the minitaur with randomized terrain.
 
-  It simulates a minitaur (a quadruped robot) on a randomized terrain. The state
-  space include the angles, velocities and torques for all the motors and the
-  action space is the desired motor angle for each motor. The reward function is
-  based on how far the minitaur walks in 1000 steps and penalizes the energy
-  expenditure.
+    It simulates a minitaur (a quadruped robot) on a randomized terrain. The state
+    space include the angles, velocities and torques for all the motors and the
+    action space is the desired motor angle for each motor. The reward function is
+    based on how far the minitaur walks in 1000 steps and penalizes the energy
+    expenditure.
 
-  """
+    """
 
   def reset(self):
     self._pybullet_client.resetSimulation()
@@ -42,11 +42,9 @@ class MinitaurRandomizeTerrainGymEnv(minitaur_gym_env.MinitaurGymEnv):
         fileName=terrain_file_name,
         flags=1,
         meshScale=[0.5, 0.5, 0.5])
-    self._pybullet_client.createMultiBody(terrain_mass,
-                                          terrain_collision_shape_id,
-                                          terrain_visual_shape_id,
-                                          terrain_position,
-                                          terrain_orientation)
+    self._pybullet_client.createMultiBody(
+        terrain_mass, terrain_collision_shape_id, terrain_visual_shape_id,
+        terrain_position, terrain_orientation)
     self._pybullet_client.setGravity(0, 0, -10)
     self.minitaur = (minitaur.Minitaur(
         pybullet_client=self._pybullet_client,
@@ -66,13 +64,13 @@ class MinitaurRandomizeTerrainGymEnv(minitaur_gym_env.MinitaurGymEnv):
   def load_random_terrain(self, terrain_dir):
     """Load a random terrain obj file.
 
-    Args:
-      terrain_dir: The directory which contains terrain obj files to be used.
+        Args:
+          terrain_dir: The directory which contains terrain obj files to be used.
 
-    Returns:
-      terrain_file_name_complete: The complete terrain obj file name in the
-      local directory.
-    """
+        Returns:
+          terrain_file_name_complete: The complete terrain obj file name in the
+          local directory.
+        """
     terrain_file_names_all = gfile.ListDir(terrain_dir)
     terrain_file_name = np.random.choice(terrain_file_names_all)
     asset_source = os.path.join(terrain_dir, terrain_file_name)

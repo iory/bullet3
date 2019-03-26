@@ -1,3 +1,8 @@
+import time
+from pybullet_envs.minitaur.envs import minitaur_gym_env
+import tensorflow as tf
+import numpy as np
+import argparse
 """An example to run of the minitaur gym environment with sine gaits.
 
 """
@@ -6,23 +11,17 @@ import csv
 import math
 import os
 import inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(os.path.dirname(currentdir)))
-print("parentdir=",parentdir)
-os.sys.path.insert(0,parentdir)
-
-import argparse
-import numpy as np
-import tensorflow as tf
-from pybullet_envs.minitaur.envs import minitaur_gym_env
-import time
-
+print("parentdir=", parentdir)
+os.sys.path.insert(0, parentdir)
 
 #FLAGS = flags.FLAGS
-#flags.DEFINE_enum(
+# flags.DEFINE_enum(
 #    "example_name", "sine", ["sine", "reset", "stand", "overheat"],
 #    "The name of the example: sine, reset, stand, or overheat.")
-#flags.DEFINE_string("output_filename", None, "The name of the output CSV file."
+# flags.DEFINE_string("output_filename", None, "The name of the output CSV file."
 #                    "Each line in the CSV file will contain the action, the "
 #                    "motor position, speed and torques.")
 #flags.DEFINE_string("log_path", None, "The directory to write the log file.")
@@ -31,13 +30,13 @@ import time
 def WriteToCSV(filename, actions_and_observations):
   """Write simulation data to file.
 
-  Save actions and observed angles, angular velocities and torques for data
-  analysis.
+    Save actions and observed angles, angular velocities and torques for data
+    analysis.
 
-  Args:
-    filename: The file to write. Can be locally or on CNS.
-    actions_and_observations: the interested simulation quantities to save.
-  """
+    Args:
+      filename: The file to write. Can be locally or on CNS.
+      actions_and_observations: the interested simulation quantities to save.
+    """
   with tf.gfile.Open(filename, "wb") as csvfile:
     csv_writer = csv.writer(csvfile, delimiter=",")
     for row in actions_and_observations:
@@ -60,7 +59,7 @@ def ResetPoseExample(log_path=None):
   action = [math.pi / 2] * 8
   for _ in range(steps):
     _, _, done, _ = environment.step(action)
-    time.sleep(1./100.)
+    time.sleep(1. / 100.)
     if done:
       break
 
@@ -68,13 +67,13 @@ def ResetPoseExample(log_path=None):
 def MotorOverheatExample(log_path=None):
   """An example of minitaur motor overheat protection is triggered.
 
-  The minitaur is leaning forward and the motors are getting obove threshold
-  torques. The overheat protection will be triggered in ~1 sec.
+    The minitaur is leaning forward and the motors are getting obove threshold
+    torques. The overheat protection will be triggered in ~1 sec.
 
-  Args:
-    log_path: The directory that the log files are written to. If log_path is
-      None, no logs will be written.
-  """
+    Args:
+      log_path: The directory that the log files are written to. If log_path is
+        None, no logs will be written.
+    """
 
   environment = minitaur_gym_env.MinitaurGymEnv(
       urdf_version=minitaur_gym_env.DERPY_V0_URDF_VERSION,
@@ -104,7 +103,7 @@ def MotorOverheatExample(log_path=None):
     observation, _, _, _ = environment.step(action)
     current_row.extend(observation.tolist())
     actions_and_observations.append(current_row)
-    time.sleep(1./100.)
+    time.sleep(1. / 100.)
 
   if FLAGS.output_filename is not None:
     WriteToCSV(FLAGS.output_filename, actions_and_observations)
@@ -113,15 +112,15 @@ def MotorOverheatExample(log_path=None):
 def SineStandExample(log_path=None):
   """An example of minitaur standing and squatting on the floor.
 
-  To validate the accurate motor model we command the robot and sit and stand up
-  periodically in both simulation and experiment. We compare the measured motor
-  trajectories, torques and gains. The results are at:
-    https://colab.corp.google.com/v2/notebook#fileId=0BxTIAnWh1hb_ZnkyYWtNQ1RYdkU&scrollTo=ZGFMl84kKqRx
+    To validate the accurate motor model we command the robot and sit and stand up
+    periodically in both simulation and experiment. We compare the measured motor
+    trajectories, torques and gains. The results are at:
+      https://colab.corp.google.com/v2/notebook#fileId=0BxTIAnWh1hb_ZnkyYWtNQ1RYdkU&scrollTo=ZGFMl84kKqRx
 
-  Args:
-    log_path: The directory that the log files are written to. If log_path is
-      None, no logs will be written.
-  """
+    Args:
+      log_path: The directory that the log files are written to. If log_path is
+        None, no logs will be written.
+    """
   environment = minitaur_gym_env.MinitaurGymEnv(
       urdf_version=minitaur_gym_env.RAINBOW_DASH_V0_URDF_VERSION,
       render=True,
@@ -151,7 +150,7 @@ def SineStandExample(log_path=None):
     observation, _, _, _ = environment.step(action)
     current_row.extend(observation.tolist())
     actions_and_observations.append(current_row)
-    time.sleep(1./100.)
+    time.sleep(1. / 100.)
 
   if FLAGS.output_filename is not None:
     WriteToCSV(FLAGS.output_filename, actions_and_observations)
@@ -160,10 +159,10 @@ def SineStandExample(log_path=None):
 def SinePolicyExample(log_path=None):
   """An example of minitaur walking with a sine gait.
 
-  Args:
-    log_path: The directory that the log files are written to. If log_path is
-      None, no logs will be written.
-  """
+    Args:
+      log_path: The directory that the log files are written to. If log_path is
+        None, no logs will be written.
+    """
   environment = minitaur_gym_env.MinitaurGymEnv(
       urdf_version=minitaur_gym_env.DERPY_V0_URDF_VERSION,
       render=True,
@@ -199,7 +198,7 @@ def SinePolicyExample(log_path=None):
     a4 = math.sin(t * speed + math.pi) * amplitude2
     action = [a1, a2, a2, a1, a3, a4, a4, a3]
     _, reward, done, _ = environment.step(action)
-    time.sleep(1./100.)
+    time.sleep(1. / 100.)
 
     sum_reward += reward
     if done:
@@ -207,14 +206,17 @@ def SinePolicyExample(log_path=None):
       environment.reset()
 
 
-
-
 def main():
-  parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('--env', help='environment ID (0==sine, 1==stand, 2=reset, 3=overheat)',type=int,  default=0)
+  parser = argparse.ArgumentParser(
+      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument(
+      '--env',
+      help='environment ID (0==sine, 1==stand, 2=reset, 3=overheat)',
+      type=int,
+      default=0)
   args = parser.parse_args()
   print("--env=" + str(args.env))
-    
+
   if (args.env == 0):
     SinePolicyExample()
   if (args.env == 1):
@@ -224,6 +226,6 @@ def main():
   if (args.env == 3):
     MotorOverheatExample()
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == '__main__':
+  main()

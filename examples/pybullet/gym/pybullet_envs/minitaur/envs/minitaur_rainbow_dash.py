@@ -1,18 +1,18 @@
+from pybullet_envs.minitaur.envs import minitaur
+import numpy as np
+import math
 """Implements the functionalities of a minitaur rainbow dash using pybullet.
 
 It is the result of first pass system identification for the rainbow dash robot.
 
 """
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
-
-import math
-
-import numpy as np
-from pybullet_envs.minitaur.envs import minitaur
+os.sys.path.insert(0, parentdir)
 
 KNEE_CONSTRAINT_POINT_LONG = [0, 0.0045, 0.088]
 KNEE_CONSTRAINT_POINT_SHORT = [0, 0.0045, 0.100]
@@ -21,21 +21,21 @@ KNEE_CONSTRAINT_POINT_SHORT = [0, 0.0045, 0.100]
 class MinitaurRainbowDash(minitaur.Minitaur):
   """The minitaur class that simulates a quadruped robot from Ghost Robotics.
 
-  """
+    """
 
   def Reset(self, reload_urdf=True, default_motor_angles=None, reset_time=3.0):
     """Reset the minitaur to its initial states.
 
-    Args:
-      reload_urdf: Whether to reload the urdf file. If not, Reset() just place
-        the minitaur back to its starting position.
-      default_motor_angles: The default motor angles. If it is None, minitaur
-        will hold a default pose (motor angle math.pi / 2) for 100 steps. In
-        torque control mode, the phase of holding the default pose is skipped.
-      reset_time: The duration (in seconds) to hold the default motor angles. If
-        reset_time <= 0 or in torque control mode, the phase of holding the
-        default pose is skipped.
-    """
+        Args:
+          reload_urdf: Whether to reload the urdf file. If not, Reset() just place
+            the minitaur back to its starting position.
+          default_motor_angles: The default motor angles. If it is None, minitaur
+            will hold a default pose (motor angle math.pi / 2) for 100 steps. In
+            torque control mode, the phase of holding the default pose is skipped.
+          reset_time: The duration (in seconds) to hold the default motor angles. If
+            reset_time <= 0 or in torque control mode, the phase of holding the
+            default pose is skipped.
+        """
     if self._on_rack:
       init_position = minitaur.INIT_RACK_POSITION
     else:
@@ -93,11 +93,11 @@ class MinitaurRainbowDash(minitaur.Minitaur):
   def _ResetPoseForLeg(self, leg_id, add_constraint):
     """Reset the initial pose for the leg.
 
-    Args:
-      leg_id: It should be 0, 1, 2, or 3, which represents the leg at
-        front_left, back_left, front_right and back_right.
-      add_constraint: Whether to add a constraint at the joints of two feet.
-    """
+        Args:
+          leg_id: It should be 0, 1, 2, or 3, which represents the leg at
+            front_left, back_left, front_right and back_right.
+          add_constraint: Whether to add a constraint at the joints of two feet.
+        """
     knee_friction_force = 0
     half_pi = math.pi / 2.0
     knee_angle = -2.1834

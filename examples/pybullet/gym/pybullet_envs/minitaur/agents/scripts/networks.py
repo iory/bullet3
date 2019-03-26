@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Networks for the PPO algorithm defined as recurrent cells."""
 
 from __future__ import absolute_import
@@ -20,17 +19,17 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-
 _MEAN_WEIGHTS_INITIALIZER = tf.contrib.layers.variance_scaling_initializer(
     factor=0.1)
 _LOGSTD_INITIALIZER = tf.random_normal_initializer(-1, 1e-10)
 
+
 class LinearGaussianPolicy(tf.contrib.rnn.RNNCell):
   """Indepent linear network with a tanh at the end for policy and feedforward network for the value.
 
-  The policy network outputs the mean action and the log standard deviation
-  is learned as indepent parameter vector.
-  """
+    The policy network outputs the mean action and the log standard deviation
+    is learned as indepent parameter vector.
+    """
 
   def __init__(self,
                policy_layers,
@@ -76,14 +75,16 @@ class LinearGaussianPolicy(tf.contrib.rnn.RNNCell):
 class ForwardGaussianPolicy(tf.contrib.rnn.RNNCell):
   """Independent feed forward networks for policy and value.
 
-  The policy network outputs the mean action and the log standard deviation
-  is learned as independent parameter vector.
-  """
+    The policy network outputs the mean action and the log standard deviation
+    is learned as independent parameter vector.
+    """
 
-  def __init__(
-      self, policy_layers, value_layers, action_size,
-      mean_weights_initializer=_MEAN_WEIGHTS_INITIALIZER,
-      logstd_initializer=_LOGSTD_INITIALIZER):
+  def __init__(self,
+               policy_layers,
+               value_layers,
+               action_size,
+               mean_weights_initializer=_MEAN_WEIGHTS_INITIALIZER,
+               logstd_initializer=_LOGSTD_INITIALIZER):
     self._policy_layers = policy_layers
     self._value_layers = value_layers
     self._action_size = action_size
@@ -105,12 +106,14 @@ class ForwardGaussianPolicy(tf.contrib.rnn.RNNCell):
       for size in self._policy_layers:
         x = tf.contrib.layers.fully_connected(x, size, tf.nn.relu)
       mean = tf.contrib.layers.fully_connected(
-          x, self._action_size, tf.tanh,
+          x,
+          self._action_size,
+          tf.tanh,
           weights_initializer=self._mean_weights_initializer)
-      logstd = tf.get_variable(
-          'logstd', mean.shape[1:], tf.float32, self._logstd_initializer)
-      logstd = tf.tile(
-          logstd[None, ...], [tf.shape(mean)[0]] + [1] * logstd.shape.ndims)
+      logstd = tf.get_variable('logstd', mean.shape[1:], tf.float32,
+                               self._logstd_initializer)
+      logstd = tf.tile(logstd[None, ...],
+                       [tf.shape(mean)[0]] + [1] * logstd.shape.ndims)
     with tf.variable_scope('value'):
       x = tf.contrib.layers.flatten(observation)
       for size in self._value_layers:
@@ -122,15 +125,17 @@ class ForwardGaussianPolicy(tf.contrib.rnn.RNNCell):
 class RecurrentGaussianPolicy(tf.contrib.rnn.RNNCell):
   """Independent recurrent policy and feed forward value networks.
 
-  The policy network outputs the mean action and the log standard deviation
-  is learned as independent parameter vector. The last policy layer is recurrent
-  and uses a GRU cell.
-  """
+    The policy network outputs the mean action and the log standard deviation
+    is learned as independent parameter vector. The last policy layer is recurrent
+    and uses a GRU cell.
+    """
 
-  def __init__(
-      self, policy_layers, value_layers, action_size,
-      mean_weights_initializer=_MEAN_WEIGHTS_INITIALIZER,
-      logstd_initializer=_LOGSTD_INITIALIZER):
+  def __init__(self,
+               policy_layers,
+               value_layers,
+               action_size,
+               mean_weights_initializer=_MEAN_WEIGHTS_INITIALIZER,
+               logstd_initializer=_LOGSTD_INITIALIZER):
     self._policy_layers = policy_layers
     self._value_layers = value_layers
     self._action_size = action_size
@@ -153,12 +158,14 @@ class RecurrentGaussianPolicy(tf.contrib.rnn.RNNCell):
         x = tf.contrib.layers.fully_connected(x, size, tf.nn.relu)
       x, state = self._cell(x, state)
       mean = tf.contrib.layers.fully_connected(
-          x, self._action_size, tf.tanh,
+          x,
+          self._action_size,
+          tf.tanh,
           weights_initializer=self._mean_weights_initializer)
-      logstd = tf.get_variable(
-          'logstd', mean.shape[1:], tf.float32, self._logstd_initializer)
-      logstd = tf.tile(
-          logstd[None, ...], [tf.shape(mean)[0]] + [1] * logstd.shape.ndims)
+      logstd = tf.get_variable('logstd', mean.shape[1:], tf.float32,
+                               self._logstd_initializer)
+      logstd = tf.tile(logstd[None, ...],
+                       [tf.shape(mean)[0]] + [1] * logstd.shape.ndims)
     with tf.variable_scope('value'):
       x = tf.contrib.layers.flatten(observation)
       for size in self._value_layers:

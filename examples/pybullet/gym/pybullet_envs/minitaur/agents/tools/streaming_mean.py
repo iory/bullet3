@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Compute a streaming estimation of the mean of submitted tensors."""
 
 from __future__ import absolute_import
@@ -27,13 +26,13 @@ class StreamingMean(object):
   def __init__(self, shape, dtype):
     """Specify the shape and dtype of the mean to be estimated.
 
-    Note that a float mean to zero submitted elements is NaN, while computing
-    the integer mean of zero elements raises a division by zero error.
+        Note that a float mean to zero submitted elements is NaN, while computing
+        the integer mean of zero elements raises a division by zero error.
 
-    Args:
-      shape: Shape of the mean to compute.
-      dtype: Data type of the mean to compute.
-    """
+        Args:
+          shape: Shape of the mean to compute.
+          dtype: Data type of the mean to compute.
+        """
     self._dtype = dtype
     self._sum = tf.Variable(lambda: tf.zeros(shape, dtype), False)
     self._count = tf.Variable(lambda: 0, trainable=False)

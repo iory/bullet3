@@ -4,7 +4,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
 import tensorflow as tf
 from pybullet_envs.agents.ppo import normalize
 from pybullet_envs.agents import utility
@@ -13,12 +12,12 @@ from pybullet_envs.agents import utility
 class SimplePPOPolicy(object):
   """A simple PPO policy that is independent to the PPO infrastructure.
 
-  This class restores the policy network from a tensorflow checkpoint that was
-  learned from PPO training. The purpose of this class is to conveniently
-  visualize a learned policy or deploy the learned policy on real robots without
-  need to change the PPO evaluation infrastructure:
-  https://cs.corp.google.com/piper///depot/google3/robotics/reinforcement_learning/agents/scripts/visualize.py.
-  """
+    This class restores the policy network from a tensorflow checkpoint that was
+    learned from PPO training. The purpose of this class is to conveniently
+    visualize a learned policy or deploy the learned policy on real robots without
+    need to change the PPO evaluation infrastructure:
+    https://cs.corp.google.com/piper///depot/google3/robotics/reinforcement_learning/agents/scripts/visualize.py.
+    """
 
   def __init__(self, sess, env, network, policy_layers, value_layers,
                checkpoint):
@@ -45,15 +44,15 @@ class SimplePPOPolicy(object):
                       checkpoint):
     """Restore the PPO policy from a TensorFlow checkpoint.
 
-    Args:
-      network: The neural network definition.
-      policy_layers: A tuple specify the number of layers and number of neurons
-        of each layer for the policy network.
-      value_layers: A tuple specify the number of layers and number of neurons
-        of each layer for the value network.
-      action_size: The dimension of the action space.
-      checkpoint: The checkpoint path.
-    """
+        Args:
+          network: The neural network definition.
+          policy_layers: A tuple specify the number of layers and number of neurons
+            of each layer for the policy network.
+          value_layers: A tuple specify the number of layers and number of neurons
+            of each layer for the value network.
+          action_size: The dimension of the action space.
+          checkpoint: The checkpoint path.
+        """
     observ = self._observ_filter.transform(self.observation_placeholder)
     with tf.variable_scope("network/rnn"):
       self.network = network(

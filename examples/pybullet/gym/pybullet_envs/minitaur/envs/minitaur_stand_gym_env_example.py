@@ -14,8 +14,7 @@ def StandUpExample():
   """An example that the minitaur stands up."""
   steps = 1000
   environment = minitaur_stand_gym_env.MinitaurStandGymEnv(
-      render=True,
-      motor_velocity_limit=np.inf)
+      render=True, motor_velocity_limit=np.inf)
   action = [0.5]
   _, _, done, _ = environment.step(action)
   for t in range(steps):

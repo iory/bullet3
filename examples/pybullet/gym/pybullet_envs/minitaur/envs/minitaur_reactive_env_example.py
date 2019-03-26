@@ -1,3 +1,7 @@
+from pybullet_envs.minitaur.envs import simple_ppo_agent
+import pybullet_data
+from pybullet_envs.minitaur.agents.scripts import utility
+import tensorflow as tf
 r"""Running a pre-trained ppo agent on minitaur_reactive_env."""
 
 from __future__ import absolute_import
@@ -8,22 +12,16 @@ import os
 import time
 
 import inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(os.path.dirname(currentdir)))
-print("parentdir=",parentdir)
-os.sys.path.insert(0,parentdir)
-
-
-
-import tensorflow as tf
-from pybullet_envs.minitaur.agents.scripts import utility
-import pybullet_data
-from pybullet_envs.minitaur.envs import simple_ppo_agent
-
+print("parentdir=", parentdir)
+os.sys.path.insert(0, parentdir)
 
 flags = tf.app.flags
 FLAGS = tf.app.flags.FLAGS
-LOG_DIR = os.path.join(pybullet_data.getDataPath(), "policies/ppo/minitaur_reactive_env")
+LOG_DIR = os.path.join(pybullet_data.getDataPath(),
+                       "policies/ppo/minitaur_reactive_env")
 CHECKPOINT = "model.ckpt-14000000"
 
 

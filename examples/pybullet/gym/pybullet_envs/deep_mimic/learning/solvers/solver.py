@@ -1,15 +1,18 @@
 from abc import abstractmethod
-import sys, abc
+import sys
+import abc
 if sys.version_info >= (3, 4):
-    ABC = abc.ABC
+  ABC = abc.ABC
 else:
-    ABC = abc.ABCMeta('ABC', (), {})
+  ABC = abc.ABCMeta('ABC', (), {})
+
 
 class Solver(ABC):
-    def __init__(self, vars):
-        self.vars = vars
-        return
 
-    @abstractmethod
-    def update(self, grads):
-        pass
+  def __init__(self, vars):
+    self.vars = vars
+    return
+
+  @abstractmethod
+  def update(self, grads):
+    pass

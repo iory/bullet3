@@ -1,18 +1,19 @@
+from pybullet_envs.minitaur.envs import env_randomizer_base
+import numpy as np
+import math
 """Adds random forces to the base of Minitaur during the simulation steps."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
 parentdir = os.path.dirname(os.path.dirname(parentdir))
-os.sys.path.insert(0,parentdir)
-
-import math
-import numpy as np
-from pybullet_envs.minitaur.envs import env_randomizer_base
+os.sys.path.insert(0, parentdir)
 
 _PERTURBATION_START_STEP = 100
 _PERTURBATION_INTERVAL_STEPS = 200
@@ -36,17 +37,17 @@ class MinitaurPushRandomizer(env_randomizer_base.EnvRandomizerBase):
   ):
     """Initializes the randomizer.
 
-    Args:
-      perturbation_start_step: No perturbation force before the env has advanced
-        this amount of steps.
-      perturbation_interval_steps: The step interval between applying
-        perturbation forces.
-      perturbation_duration_steps: The duration of the perturbation force.
-      horizontal_force_bound: The lower and upper bound of the applied force
-        magnitude when projected in the horizontal plane.
-      vertical_force_bound: The z component (abs value) bound of the applied
-        perturbation force.
-    """
+        Args:
+          perturbation_start_step: No perturbation force before the env has advanced
+            this amount of steps.
+          perturbation_interval_steps: The step interval between applying
+            perturbation forces.
+          perturbation_duration_steps: The duration of the perturbation force.
+          horizontal_force_bound: The lower and upper bound of the applied force
+            magnitude when projected in the horizontal plane.
+          vertical_force_bound: The z component (abs value) bound of the applied
+            perturbation force.
+        """
     self._perturbation_start_step = perturbation_start_step
     self._perturbation_interval_steps = perturbation_interval_steps
     self._perturbation_duration_steps = perturbation_duration_steps
@@ -60,19 +61,19 @@ class MinitaurPushRandomizer(env_randomizer_base.EnvRandomizerBase):
   def randomize_env(self, env):
     """Randomizes the simulation environment.
 
-    Args:
-      env: The Minitaur gym environment to be randomized.
-    """
+        Args:
+          env: The Minitaur gym environment to be randomized.
+        """
     pass
 
   def randomize_step(self, env):
     """Randomizes simulation steps.
 
-    Will be called at every timestep. May add random forces/torques to Minitaur.
+        Will be called at every timestep. May add random forces/torques to Minitaur.
 
-    Args:
-      env: The Minitaur gym environment to be randomized.
-    """
+        Args:
+          env: The Minitaur gym environment to be randomized.
+        """
     base_link_ids = env.minitaur.chassis_link_ids
     if env.env_step_counter % self._perturbation_interval_steps == 0:
       self._applied_link_id = base_link_ids[np.random.randint(

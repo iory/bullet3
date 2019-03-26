@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Combine multiple environments to step them in batch."""
 
 from __future__ import absolute_import
@@ -27,17 +26,17 @@ class BatchEnv(object):
   def __init__(self, envs, blocking):
     """Combine multiple environments to step them in batch.
 
-    To step environments in parallel, environments must support a
-    `blocking=False` argument to their step and reset functions that makes them
-    return callables instead to receive the result at a later time.
+        To step environments in parallel, environments must support a
+        `blocking=False` argument to their step and reset functions that makes them
+        return callables instead to receive the result at a later time.
 
-    Args:
-      envs: List of environments.
-      blocking: Step environments after another rather than in parallel.
+        Args:
+          envs: List of environments.
+          blocking: Step environments after another rather than in parallel.
 
-    Raises:
-      ValueError: Environments have different observation or action spaces.
-    """
+        Raises:
+          ValueError: Environments have different observation or action spaces.
+        """
     self._envs = envs
     self._blocking = blocking
     observ_space = self._envs[0].observation_space
@@ -58,26 +57,26 @@ class BatchEnv(object):
   def __getattr__(self, name):
     """Forward unimplemented attributes to one of the original environments.
 
-    Args:
-      name: Attribute that was accessed.
+        Args:
+          name: Attribute that was accessed.
 
-    Returns:
-      Value behind the attribute name one of the wrapped environments.
-    """
+        Returns:
+          Value behind the attribute name one of the wrapped environments.
+        """
     return getattr(self._envs[0], name)
 
   def step(self, action):
     """Forward a batch of actions to the wrapped environments.
 
-    Args:
-      action: Batched action to apply to the environment.
+        Args:
+          action: Batched action to apply to the environment.
 
-    Raises:
-      ValueError: Invalid actions.
+        Raises:
+          ValueError: Invalid actions.
 
-    Returns:
-      Batch of observations, rewards, and done flags.
-    """
+        Returns:
+          Batch of observations, rewards, and done flags.
+        """
     actions = action
     for index, (env, action) in enumerate(zip(self._envs, actions)):
       if not env.action_space.contains(action):
@@ -85,12 +84,13 @@ class BatchEnv(object):
         raise ValueError(message.format(index, action))
     if self._blocking:
       transitions = [
-          env.step(action)
-          for env, action in zip(self._envs, actions)]
+          env.step(action) for env, action in zip(self._envs, actions)
+      ]
     else:
       transitions = [
           env.step(action, blocking=False)
-          for env, action in zip(self._envs, actions)]
+          for env, action in zip(self._envs, actions)
+      ]
       transitions = [transition() for transition in transitions]
     observs, rewards, dones, infos = zip(*transitions)
     observ = np.stack(observs)
@@ -102,12 +102,12 @@ class BatchEnv(object):
   def reset(self, indices=None):
     """Reset the environment and convert the resulting observation.
 
-    Args:
-      indices: The batch indices of environments to reset; defaults to all.
+        Args:
+          indices: The batch indices of environments to reset; defaults to all.
 
-    Returns:
-      Batch of observations.
-    """
+        Returns:
+          Batch of observations.
+        """
     if indices is None:
       indices = np.arange(len(self._envs))
     if self._blocking:

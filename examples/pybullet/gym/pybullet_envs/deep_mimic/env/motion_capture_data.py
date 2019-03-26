@@ -1,6 +1,8 @@
 import json
 
+
 class MotionCaptureData(object):
+
   def __init__(self):
     self.Reset()
 
@@ -12,8 +14,7 @@ class MotionCaptureData(object):
       self._motion_data = json.load(f)
 
   def NumFrames(self):
-    return  len(self._motion_data['Frames'])
+    return len(self._motion_data['Frames'])
 
   def KeyFrameDuraction(self):
-  	return self._motion_data['Frames'][0][0]
- 
+    return self._motion_data['Frames'][0][0]

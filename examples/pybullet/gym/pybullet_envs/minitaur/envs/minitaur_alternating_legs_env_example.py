@@ -1,19 +1,20 @@
+from pybullet_envs.minitaur.envs.env_randomizers import minitaur_alternating_legs_env_randomizer as randomizer_lib
+from pybullet_envs.minitaur.envs import minitaur_gym_env
+from pybullet_envs.minitaur.envs import minitaur_alternating_legs_env
+import tensorflow as tf
+import numpy as np
+import os
 """An example to run the minitaur environment of alternating legs.
 
 """
 import time
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
-
 import os
-import numpy as np
-import tensorflow as tf
-from pybullet_envs.minitaur.envs import minitaur_alternating_legs_env
-from pybullet_envs.minitaur.envs import minitaur_gym_env
-from pybullet_envs.minitaur.envs.env_randomizers import minitaur_alternating_legs_env_randomizer as randomizer_lib
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(os.path.dirname(currentdir))
+os.sys.path.insert(0, parentdir)
 
 #FLAGS = flags.FLAGS
 #flags.DEFINE_string("log_path", None, "The directory to write the log file.")
@@ -22,14 +23,14 @@ from pybullet_envs.minitaur.envs.env_randomizers import minitaur_alternating_leg
 def hand_tuned_agent(observation, timestamp):
   """A hand tuned controller structure with vizier optimized parameters.
 
-  Args:
-    observation: The observation of the environment. It includes the roll, pith
-      the speed of roll and pitch changes.
-    timestamp: The simulated time since the simulation reset.
-  Returns:
-    Delta desired motor angles to be added to the reference motion of
-      alternating legs for balance.
-  """
+    Args:
+      observation: The observation of the environment. It includes the roll, pith
+        the speed of roll and pitch changes.
+      timestamp: The simulated time since the simulation reset.
+    Returns:
+      Delta desired motor angles to be added to the reference motion of
+        alternating legs for balance.
+    """
   roll = observation[0]
   pitch = observation[1]
   roll_dot = observation[2]
@@ -68,10 +69,10 @@ def hand_tuned_agent(observation, timestamp):
 def hand_tuned_balance_example(log_path=None):
   """An example that the minitaur balances while alternating its legs.
 
-  Args:
-    log_path: The directory that the log files are written to. If log_path is
-      None, no logs will be written.
-  """
+    Args:
+      log_path: The directory that the log files are written to. If log_path is
+        None, no logs will be written.
+    """
   steps = 1000
   episodes = 5
 

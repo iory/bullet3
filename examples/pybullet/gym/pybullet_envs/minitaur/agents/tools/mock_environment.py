@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Mock environment for testing reinforcement learning code."""
 
 from __future__ import absolute_import
@@ -29,16 +28,16 @@ class MockEnvironment(object):
   def __init__(self, observ_shape, action_shape, min_duration, max_duration):
     """Generate random agent input and keep track of statistics.
 
-    Args:
-      observ_shape: Shape for the random observations.
-      action_shape: Shape for the action space.
-      min_duration: Minimum number of steps per episode.
-      max_duration: Maximum number of steps per episode.
+        Args:
+          observ_shape: Shape for the random observations.
+          action_shape: Shape for the action space.
+          min_duration: Minimum number of steps per episode.
+          max_duration: Maximum number of steps per episode.
 
-    Attributes:
-      steps: List of actual simulated lengths for all episodes.
-      durations: List of decided lengths for all episodes.
-    """
+        Attributes:
+          steps: List of actual simulated lengths for all episodes.
+          durations: List of decided lengths for all episodes.
+        """
     self._observ_shape = observ_shape
     self._action_shape = action_shape
     self._min_duration = min_duration

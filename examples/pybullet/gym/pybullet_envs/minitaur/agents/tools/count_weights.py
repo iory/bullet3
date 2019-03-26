@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Count learnable parameters."""
 
 from __future__ import absolute_import
@@ -27,14 +26,14 @@ import tensorflow as tf
 def count_weights(scope=None, exclude=None, graph=None):
   """Count learnable parameters.
 
-  Args:
-    scope: Resrict the count to a variable scope.
-    exclude: Regex to match variable names to exclude.
-    graph: Operate on a graph other than the current default graph.
+    Args:
+      scope: Resrict the count to a variable scope.
+      exclude: Regex to match variable names to exclude.
+      graph: Operate on a graph other than the current default graph.
 
-  Returns:
-    Number of learnable parameters as integer.
-  """
+    Returns:
+      Number of learnable parameters as integer.
+    """
   if scope:
     scope = scope if scope.endswith('/') else scope + '/'
   graph = graph or tf.get_default_graph()

@@ -10,9 +10,8 @@ import minitaur_ball_gym_env
 
 def FollowBallManualPolicy():
   """An example of a minitaur following a ball."""
-  env = minitaur_ball_gym_env.MinitaurBallGymEnv(render=True,
-                                                 pd_control_enabled=True,
-                                                 on_rack=False)
+  env = minitaur_ball_gym_env.MinitaurBallGymEnv(
+      render=True, pd_control_enabled=True, on_rack=False)
   observation = env.reset()
   sum_reward = 0
   steps = 100000
@@ -31,4 +30,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+  main()

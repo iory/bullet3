@@ -1,3 +1,8 @@
+from pybullet_envs.minitaur.envs import minitaur_logging_pb2
+import tensorflow as tf
+import time
+import os
+import datetime
 """A proto buffer based logging system for minitaur experiments.
 
 The logging system records the time since reset, base position, orientation,
@@ -10,17 +15,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
-
-import datetime
 import os
-import time
-
-import tensorflow as tf
-from pybullet_envs.minitaur.envs import minitaur_logging_pb2
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(os.path.dirname(currentdir))
+os.sys.path.insert(0, parentdir)
 
 NUM_MOTORS = 8
 
@@ -34,15 +34,15 @@ def _update_base_state(base_state, values):
 def preallocate_episode_proto(episode_proto, max_num_steps):
   """Preallocate the memory for proto buffer.
 
-  Dynamically allocating memory as the protobuf expands causes unexpected delay
-  that is not tolerable with locomotion control.
+    Dynamically allocating memory as the protobuf expands causes unexpected delay
+    that is not tolerable with locomotion control.
 
-  Args:
-    episode_proto: The proto that holds the state/action data for the current
-      episode.
-    max_num_steps: The max number of steps that will be recorded in the proto.
-      The state/data over max_num_steps will not be stored in the proto.
-  """
+    Args:
+      episode_proto: The proto that holds the state/action data for the current
+        episode.
+      max_num_steps: The max number of steps that will be recorded in the proto.
+        The state/data over max_num_steps will not be stored in the proto.
+    """
   for _ in range(max_num_steps):
     step_log = episode_proto.state_action.add()
     step_log.info_valid = False
@@ -62,16 +62,16 @@ def preallocate_episode_proto(episode_proto, max_num_steps):
 def update_episode_proto(episode_proto, minitaur, action, step):
   """Update the episode proto by appending the states/action of the minitaur.
 
-  Note that the state/data over max_num_steps preallocated
-  (len(episode_proto.state_action)) will not be stored in the proto.
-  Args:
-    episode_proto: The proto that holds the state/action data for the current
-      episode.
-    minitaur: The minitaur instance. See envs.minitaur for details.
-    action: The action applied at this time step. The action is an 8-element
-      numpy floating-point array.
-    step: The current step index.
-  """
+    Note that the state/data over max_num_steps preallocated
+    (len(episode_proto.state_action)) will not be stored in the proto.
+    Args:
+      episode_proto: The proto that holds the state/action data for the current
+        episode.
+      minitaur: The minitaur instance. See envs.minitaur for details.
+      action: The action applied at this time step. The action is an 8-element
+        numpy floating-point array.
+      step: The current step index.
+    """
   max_num_steps = len(episode_proto.state_action)
   if step >= max_num_steps:
     tf.logging.warning(
@@ -109,23 +109,22 @@ class MinitaurLogging(object):
   def save_episode(self, episode_proto):
     """Save episode_proto to self._log_path.
 
-    self._log_path is the directory name. A time stamp is the file name of the
-    log file. For example, when self._log_path is "/tmp/logs/", the actual
-    log file would be "/tmp/logs/yyyy-mm-dd-hh:mm:ss".
+        self._log_path is the directory name. A time stamp is the file name of the
+        log file. For example, when self._log_path is "/tmp/logs/", the actual
+        log file would be "/tmp/logs/yyyy-mm-dd-hh:mm:ss".
 
-    Args:
-      episode_proto: The proto that holds the states/action for the current
-        episode that needs to be save to disk.
-    Returns:
-      The full log path, including the directory name and the file name.
-    """
+        Args:
+          episode_proto: The proto that holds the states/action for the current
+            episode that needs to be save to disk.
+        Returns:
+          The full log path, including the directory name and the file name.
+        """
     if not self._log_path or not episode_proto.state_action:
       return self._log_path
     if not tf.gfile.Exists(self._log_path):
       tf.gfile.MakeDirs(self._log_path)
     ts = time.time()
-    time_stamp = datetime.datetime.fromtimestamp(ts).strftime(
-        "%Y-%m-%d-%H%M%S")
+    time_stamp = datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d-%H%M%S")
     log_path = os.path.join(self._log_path,
                             "minitaur_log_{}".format(time_stamp))
     with tf.gfile.Open(log_path, "w") as f:
@@ -135,11 +134,11 @@ class MinitaurLogging(object):
   def restore_episode(self, log_path):
     """Restore the episodic proto from the log path.
 
-    Args:
-      log_path: The full path of the log file.
-    Returns:
-      The minitaur episode proto.
-    """
+        Args:
+          log_path: The full path of the log file.
+        Returns:
+          The minitaur episode proto.
+        """
     with tf.gfile.Open(log_path, 'rb') as f:
       content = f.read()
       episode_proto = minitaur_logging_pb2.MinitaurEpisode()

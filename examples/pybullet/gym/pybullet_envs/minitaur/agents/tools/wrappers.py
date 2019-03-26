@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Wrappers for OpenAI Gym environments."""
 
 from __future__ import absolute_import
@@ -102,17 +101,17 @@ class FrameHistory(object):
   def __init__(self, env, past_indices, flatten):
     """Augment the observation with past observations.
 
-    Implemented as a Numpy ring buffer holding the necessary past observations.
+        Implemented as a Numpy ring buffer holding the necessary past observations.
 
-    Args:
-      env: OpenAI Gym environment to wrap.
-      past_indices: List of non-negative integers indicating the time offsets
-        from the current time step of observations to include.
-      flatten: Concatenate the past observations rather than stacking them.
+        Args:
+          env: OpenAI Gym environment to wrap.
+          past_indices: List of non-negative integers indicating the time offsets
+            from the current time step of observations to include.
+          flatten: Concatenate the past observations rather than stacking them.
 
-    Raises:
-      KeyError: The current observation is not included in the indices.
-    """
+        Raises:
+          KeyError: The current observation is not included in the indices.
+        """
     if 0 not in past_indices:
       raise KeyError('Past indices should include 0 for the current frame.')
     self._env = env
@@ -151,7 +150,8 @@ class FrameHistory(object):
 
   def _select_frames(self):
     indices = [
-        (self._step - index) % self._capacity for index in self._past_indices]
+        (self._step - index) % self._capacity for index in self._past_indices
+    ]
     observ = self._buffer[indices]
     if self._flatten:
       observ = np.reshape(observ, (-1,) + observ.shape[2:])
@@ -192,14 +192,14 @@ class RangeNormalize(object):
 
   def __init__(self, env, observ=None, action=None):
     self._env = env
-    self._should_normalize_observ = (
-        observ is not False and self._is_finite(self._env.observation_space))
+    self._should_normalize_observ = (observ is not False and self._is_finite(
+        self._env.observation_space))
     if observ is True and not self._should_normalize_observ:
       raise ValueError('Cannot normalize infinite observation range.')
     if observ is None and not self._should_normalize_observ:
       tf.logging.info('Not normalizing infinite observation range.')
-    self._should_normalize_action = (
-        action is not False and self._is_finite(self._env.action_space))
+    self._should_normalize_action = (action is not False and
+                                     self._is_finite(self._env.action_space))
     if action is True and not self._should_normalize_action:
       raise ValueError('Cannot normalize infinite action range.')
     if action is None and not self._should_normalize_action:
@@ -314,18 +314,18 @@ class ExternalProcess(object):
   def __init__(self, constructor):
     """Step environment in a separate process for lock free paralellism.
 
-    The environment will be created in the external process by calling the
-    specified callable. This can be an environment class, or a function
-    creating the environment and potentially wrapping it. The returned
-    environment should not access global variables.
+        The environment will be created in the external process by calling the
+        specified callable. This can be an environment class, or a function
+        creating the environment and potentially wrapping it. The returned
+        environment should not access global variables.
 
-    Args:
-      constructor: Callable that creates and returns an OpenAI gym environment.
+        Args:
+          constructor: Callable that creates and returns an OpenAI gym environment.
 
-    Attributes:
-      observation_space: The cached observation space of the environment.
-      action_space: The cached action space of the environment.
-    """
+        Attributes:
+          observation_space: The cached observation space of the environment.
+          action_space: The cached action space of the environment.
+        """
     self._conn, conn = multiprocessing.Pipe()
     self._process = multiprocessing.Process(
         target=self._worker, args=(constructor, conn))
@@ -349,29 +349,29 @@ class ExternalProcess(object):
   def __getattr__(self, name):
     """Request an attribute from the environment.
 
-    Note that this involves communication with the external process, so it can
-    be slow.
+        Note that this involves communication with the external process, so it can
+        be slow.
 
-    Args:
-      name: Attribute to access.
+        Args:
+          name: Attribute to access.
 
-    Returns:
-      Value of the attribute.
-    """
+        Returns:
+          Value of the attribute.
+        """
     self._conn.send((self._ATTRIBUTE, name))
     return self._receive(self._VALUE)
 
   def step(self, action, blocking=True):
     """Step the environment.
 
-    Args:
-      action: The action to apply to the environment.
-      blocking: Whether to wait for the result.
+        Args:
+          action: The action to apply to the environment.
+          blocking: Whether to wait for the result.
 
-    Returns:
-      Transition tuple when blocking, otherwise callable that returns the
-      transition tuple.
-    """
+        Returns:
+          Transition tuple when blocking, otherwise callable that returns the
+          transition tuple.
+        """
     self._conn.send((self._ACTION, action))
     if blocking:
       return self._receive(self._TRANSITION)
@@ -381,13 +381,13 @@ class ExternalProcess(object):
   def reset(self, blocking=True):
     """Reset the environment.
 
-    Args:
-      blocking: Whether to wait for the result.
+        Args:
+          blocking: Whether to wait for the result.
 
-    Returns:
-      New observation when blocking, otherwise callable that returns the new
-      observation.
-    """
+        Returns:
+          New observation when blocking, otherwise callable that returns the new
+          observation.
+        """
     self._conn.send((self._RESET, None))
     if blocking:
       return self._receive(self._OBSERV)
@@ -407,16 +407,16 @@ class ExternalProcess(object):
   def _receive(self, expected_message):
     """Wait for a message from the worker process and return its payload.
 
-    Args:
-      expected_message: Type of the expected message.
+        Args:
+          expected_message: Type of the expected message.
 
-    Raises:
-      Exception: An exception was raised inside the worker process.
-      KeyError: The reveived message is not of the expected type.
+        Raises:
+          Exception: An exception was raised inside the worker process.
+          KeyError: The reveived message is not of the expected type.
 
-    Returns:
-      Payload object of the message.
-    """
+        Returns:
+          Payload object of the message.
+        """
     message, payload = self._conn.recv()
     # Re-raise exceptions in the main process.
     if message == self._EXCEPTION:
@@ -429,10 +429,10 @@ class ExternalProcess(object):
   def _worker(self, constructor, conn):
     """The process waits for actions and sends back environment results.
 
-    Args:
-      constructor: Constructor for the OpenAI Gym environment.
-      conn: Connection for communication to the main process.
-    """
+        Args:
+          constructor: Constructor for the OpenAI Gym environment.
+          conn: Connection for communication to the main process.
+        """
     try:
       env = constructor()
       while True:
@@ -472,34 +472,34 @@ class ConvertTo32Bit(object):
   def __init__(self, env):
     """Convert data types of an OpenAI Gym environment to 32 bit.
 
-    Args:
-      env: OpenAI Gym environment.
-    """
+        Args:
+          env: OpenAI Gym environment.
+        """
     self._env = env
 
   def __getattr__(self, name):
     """Forward unimplemented attributes to the original environment.
 
-    Args:
-      name: Attribute that was accessed.
+        Args:
+          name: Attribute that was accessed.
 
-    Returns:
-      Value behind the attribute name in the wrapped environment.
-    """
+        Returns:
+          Value behind the attribute name in the wrapped environment.
+        """
     return getattr(self._env, name)
 
   def step(self, action):
     """Forward action to the wrapped environment.
 
-    Args:
-      action: Action to apply to the environment.
+        Args:
+          action: Action to apply to the environment.
 
-    Raises:
-      ValueError: Invalid action.
+        Raises:
+          ValueError: Invalid action.
 
-    Returns:
-      Converted observation, converted reward, done flag, and info object.
-    """
+        Returns:
+          Converted observation, converted reward, done flag, and info object.
+        """
     observ, reward, done, info = self._env.step(action)
     observ = self._convert_observ(observ)
     reward = self._convert_reward(reward)
@@ -508,9 +508,9 @@ class ConvertTo32Bit(object):
   def reset(self):
     """Reset the environment and convert the resulting observation.
 
-    Returns:
-      Converted observation.
-    """
+        Returns:
+          Converted observation.
+        """
     observ = self._env.reset()
     observ = self._convert_observ(observ)
     return observ
@@ -518,15 +518,15 @@ class ConvertTo32Bit(object):
   def _convert_observ(self, observ):
     """Convert the observation to 32 bits.
 
-    Args:
-      observ: Numpy observation.
+        Args:
+          observ: Numpy observation.
 
-    Raises:
-      ValueError: Observation contains infinite values.
+        Raises:
+          ValueError: Observation contains infinite values.
 
-    Returns:
-      Numpy observation with 32-bit data type.
-    """
+        Returns:
+          Numpy observation with 32-bit data type.
+        """
     if not np.isfinite(observ).all():
       raise ValueError('Infinite observation encountered.')
     if observ.dtype == np.float64:
@@ -538,15 +538,15 @@ class ConvertTo32Bit(object):
   def _convert_reward(self, reward):
     """Convert the reward to 32 bits.
 
-    Args:
-      reward: Numpy reward.
+        Args:
+          reward: Numpy reward.
 
-    Raises:
-      ValueError: Rewards contain infinite values.
+        Raises:
+          ValueError: Rewards contain infinite values.
 
-    Returns:
-      Numpy reward with 32-bit data type.
-    """
+        Returns:
+          Numpy reward with 32-bit data type.
+        """
     if not np.isfinite(reward).all():
       raise ValueError('Infinite reward encountered.')
     return np.array(reward, dtype=np.float32)

@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Example configurations using the PPO algorithm."""
 
 from __future__ import absolute_import
@@ -29,6 +28,7 @@ import pybullet_envs.bullet.minitaur_gym_env as minitaur_gym_env
 import pybullet_envs
 import tensorflow as tf
 
+
 def default():
   """Default configuration for PPO."""
   # General
@@ -39,9 +39,7 @@ def default():
   # Network
   network = networks.feed_forward_gaussian
   weight_summaries = dict(
-      all=r'.*',
-      policy=r'.*/policy/.*',
-      value=r'.*/value/.*')
+      all=r'.*', policy=r'.*/policy/.*', value=r'.*/value/.*')
   policy_layers = 200, 100
   value_layers = 200, 100
   init_mean_factor = 0.1
@@ -52,7 +50,7 @@ def default():
   optimizer = tf.train.AdamOptimizer
   update_epochs_policy = 64
   update_epochs_value = 64
-  learning_rate = 1e-4  
+  learning_rate = 1e-4
   # Losses
   discount = 0.995
   kl_target = 1e-2
@@ -69,6 +67,7 @@ def pybullet_pendulum():
   steps = 5e7  # 50M
   return locals()
 
+
 def pybullet_doublependulum():
   locals().update(default())
   env = 'InvertedDoublePendulumBulletEnv-v0'
@@ -76,12 +75,14 @@ def pybullet_doublependulum():
   steps = 5e7  # 50M
   return locals()
 
+
 def pybullet_pendulumswingup():
   locals().update(default())
   env = 'InvertedPendulumSwingupBulletEnv-v0'
   max_length = 1000
   steps = 5e7  # 50M
   return locals()
+
 
 def pybullet_cheetah():
   """Configuration for MuJoCo's half cheetah task."""
@@ -92,12 +93,14 @@ def pybullet_cheetah():
   steps = 1e8  # 100M
   return locals()
 
+
 def pybullet_ant():
   locals().update(default())
   env = 'AntBulletEnv-v0'
   max_length = 1000
   steps = 5e7  # 50M
   return locals()
+
 
 def pybullet_kuka_grasping():
   """Configuration for Bullet Kuka grasping task."""
@@ -113,7 +116,8 @@ def pybullet_racecar():
   """Configuration for Bullet MIT Racecar task."""
   locals().update(default())
   # Environment
-  env = 'RacecarBulletEnv-v0' #functools.partial(racecarGymEnv.RacecarGymEnv, isDiscrete=False, renders=True)
+  # functools.partial(racecarGymEnv.RacecarGymEnv, isDiscrete=False, renders=True)
+  env = 'RacecarBulletEnv-v0'
   max_length = 10
   steps = 1e7  # 10M
   return locals()
@@ -143,6 +147,7 @@ def pybullet_minitaur():
   steps = 3e7  # 30M
   return locals()
 
+
 def pybullet_duck_minitaur():
   """Configuration specific to minitaur_gym_env.MinitaurBulletDuckEnv class."""
   locals().update(default())
@@ -157,4 +162,3 @@ def pybullet_duck_minitaur():
   max_length = 1000
   steps = 3e7  # 30M
   return locals()
-

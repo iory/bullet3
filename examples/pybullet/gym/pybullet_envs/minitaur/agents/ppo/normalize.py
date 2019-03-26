@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Normalize tensors based on streaming estimates of mean and variance."""
 
 from __future__ import absolute_import
@@ -24,20 +23,24 @@ import tensorflow as tf
 class StreamingNormalize(object):
   """Normalize tensors based on streaming estimates of mean and variance."""
 
-  def __init__(
-      self, template, center=True, scale=True, clip=10, name='normalize'):
+  def __init__(self,
+               template,
+               center=True,
+               scale=True,
+               clip=10,
+               name='normalize'):
     """Normalize tensors based on streaming estimates of mean and variance.
 
-    Centering the value, scaling it by the standard deviation, and clipping
-    outlier values are optional.
+        Centering the value, scaling it by the standard deviation, and clipping
+        outlier values are optional.
 
-    Args:
-      template: Example tensor providing shape and dtype of the vaule to track.
-      center: Python boolean indicating whether to subtract mean from values.
-      scale: Python boolean indicating whether to scale values by stddev.
-      clip: If and when to clip normalized values.
-      name: Parent scope of operations provided by this class.
-    """
+        Args:
+          template: Example tensor providing shape and dtype of the vaule to track.
+          center: Python boolean indicating whether to subtract mean from values.
+          scale: Python boolean indicating whether to scale values by stddev.
+          clip: If and when to clip normalized values.
+          name: Parent scope of operations provided by this class.
+        """
     self._center = center
     self._scale = scale
     self._clip = clip
@@ -50,15 +53,15 @@ class StreamingNormalize(object):
   def transform(self, value):
     """Normalize a single or batch tensor.
 
-    Applies the activated transformations in the constructor using current
-    estimates of mean and variance.
+        Applies the activated transformations in the constructor using current
+        estimates of mean and variance.
 
-    Args:
-      value: Batch or single value tensor.
+        Args:
+          value: Batch or single value tensor.
 
-    Returns:
-      Normalized batch or single value tensor.
-    """
+        Returns:
+          Normalized batch or single value tensor.
+        """
     with tf.name_scope(self._name + '/transform'):
       no_batch_dim = value.shape.ndims == self._mean.shape.ndims
       if no_batch_dim:
@@ -68,9 +71,8 @@ class StreamingNormalize(object):
         value -= self._mean[None, ...]
       if self._scale:
         # We cannot scale before seeing at least two samples.
-        value /= tf.cond(
-            self._count > 1, lambda: self._std() + 1e-8,
-            lambda: tf.ones_like(self._var_sum))[None]
+        value /= tf.cond(self._count > 1, lambda: self._std() + 1e-8, lambda: tf
+                         .ones_like(self._var_sum))[None]
       if self._clip:
         value = tf.clip_by_value(value, -self._clip, self._clip)
       # Remove batch dimension if necessary.
@@ -81,12 +83,12 @@ class StreamingNormalize(object):
   def update(self, value):
     """Update the mean and variance estimates.
 
-    Args:
-      value: Batch or single value tensor.
+        Args:
+          value: Batch or single value tensor.
 
-    Returns:
-      Summary tensor.
-    """
+        Returns:
+          Summary tensor.
+        """
     with tf.name_scope(self._name + '/update'):
       if value.shape.ndims == self._mean.shape.ndims:
         # Add a batch dimension if necessary.
@@ -97,8 +99,8 @@ class StreamingNormalize(object):
         mean_delta = tf.reduce_sum(value - self._mean[None, ...], 0)
         new_mean = self._mean + mean_delta / step
         new_mean = tf.cond(self._count > 1, lambda: new_mean, lambda: value[0])
-        var_delta = (
-            value - self._mean[None, ...]) * (value - new_mean[None, ...])
+        var_delta = (value - self._mean[None, ...]) * (
+            value - new_mean[None, ...])
         new_var_sum = self._var_sum + tf.reduce_sum(var_delta, 0)
       with tf.control_dependencies([new_mean, new_var_sum]):
         update = self._mean.assign(new_mean), self._var_sum.assign(new_var_sum)
@@ -110,23 +112,22 @@ class StreamingNormalize(object):
   def reset(self):
     """Reset the estimates of mean and variance.
 
-    Resets the full state of this class.
+        Resets the full state of this class.
 
-    Returns:
-      Operation.
-    """
+        Returns:
+          Operation.
+        """
     with tf.name_scope(self._name + '/reset'):
       return tf.group(
-          self._count.assign(0),
-          self._mean.assign(tf.zeros_like(self._mean)),
+          self._count.assign(0), self._mean.assign(tf.zeros_like(self._mean)),
           self._var_sum.assign(tf.zeros_like(self._var_sum)))
 
   def summary(self):
     """Summary string of mean and standard deviation.
 
-    Returns:
-      Summary tensor.
-    """
+        Returns:
+          Summary tensor.
+        """
     with tf.name_scope(self._name + '/summary'):
       mean_summary = tf.cond(
           self._count > 0, lambda: self._summary('mean', self._mean), str)
@@ -137,16 +138,16 @@ class StreamingNormalize(object):
   def _std(self):
     """Computes the current estimate of the standard deviation.
 
-    Note that the standard deviation is not defined until at least two samples
-    were seen.
+        Note that the standard deviation is not defined until at least two samples
+        were seen.
 
-    Returns:
-      Tensor of current variance.
-    """
+        Returns:
+          Tensor of current variance.
+        """
     variance = tf.cond(
-        self._count > 1,
-        lambda: self._var_sum / tf.cast(self._count - 1, tf.float32),
-        lambda: tf.ones_like(self._var_sum) * float('nan'))
+        self._count >
+        1, lambda: self._var_sum / tf.cast(self._count - 1, tf.float32), lambda:
+        tf.ones_like(self._var_sum) * float('nan'))
     # The epsilon corrects for small negative variance values caused by
     # the algorithm. It was empirically chosen to work with all environments
     # tested.
@@ -155,13 +156,13 @@ class StreamingNormalize(object):
   def _summary(self, name, tensor):
     """Create a scalar or histogram summary matching the rank of the tensor.
 
-    Args:
-      name: Name for the summary.
-      tensor: Tensor to summarize.
+        Args:
+          name: Name for the summary.
+          tensor: Tensor to summarize.
 
-    Returns:
-      Summary tensor.
-    """
+        Returns:
+          Summary tensor.
+        """
     if tensor.shape.ndims == 0:
       return tf.summary.scalar(name, tensor)
     else:

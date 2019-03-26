@@ -1,14 +1,15 @@
+from pybullet_envs.minitaur.envs import env_randomizer_base
+import numpy as np
 """Randomize the minitaur_gym_env when reset() is called."""
 import random
 
-import os,  inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import inspect
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
 parentdir = os.path.dirname(os.path.dirname(parentdir))
-os.sys.path.insert(0,parentdir)
-
-import numpy as np
-from pybullet_envs.minitaur.envs import env_randomizer_base
+os.sys.path.insert(0, parentdir)
 
 # Relative range.
 MINITAUR_BASE_MASS_ERROR_RANGE = (-0.2, 0.2)  # 0.2 means 20%
@@ -38,13 +39,13 @@ class MinitaurEnvRandomizer(env_randomizer_base.EnvRandomizerBase):
   def _randomize_minitaur(self, minitaur):
     """Randomize various physical properties of minitaur.
 
-    It randomizes the mass/inertia of the base, mass/inertia of the legs,
-    friction coefficient of the feet, the battery voltage and the motor damping
-    at each reset() of the environment.
+        It randomizes the mass/inertia of the base, mass/inertia of the legs,
+        friction coefficient of the feet, the battery voltage and the motor damping
+        at each reset() of the environment.
 
-    Args:
-      minitaur: the Minitaur instance in minitaur_gym_env environment.
-    """
+        Args:
+          minitaur: the Minitaur instance in minitaur_gym_env environment.
+        """
     base_mass = minitaur.GetBaseMassesFromURDF()
     randomized_base_mass = random.uniform(
         np.array(base_mass) * (1.0 + self._minitaur_base_mass_err_range[0]),

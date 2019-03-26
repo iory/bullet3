@@ -1,19 +1,18 @@
-#add parent dir to find package. Only needed for source code build, pip install doesn't need it.
+# add parent dir to find package. Only needed for source code build, pip install doesn't need it.
+import time
+import pybullet as p
+import pybullet_data
 import os
 import inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
-
-import pybullet_data
-import pybullet as p
-import time
+os.sys.path.insert(0, parentdir)
 
 p.connect(p.GUI_SERVER)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
-while(1):
-	#this is a no-op command, to allow GUI updates on Mac OSX (main thread)
-	p.setPhysicsEngineParameter()
-	time.sleep(0.01)
-	
+while (1):
+  # this is a no-op command, to allow GUI updates on Mac OSX (main thread)
+  p.setPhysicsEngineParameter()
+  time.sleep(0.01)

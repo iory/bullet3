@@ -31,13 +31,13 @@ class MinitaurEnvRandomizer(env_randomizer_base.EnvRandomizerBase):
   def _randomize_minitaur(self, minitaur):
     """Randomize various physical properties of minitaur.
 
-    It randomizes the mass/inertia of the base, mass/inertia of the legs,
-    friction coefficient of the feet, the battery voltage and the motor damping
-    at each reset() of the environment.
+        It randomizes the mass/inertia of the base, mass/inertia of the legs,
+        friction coefficient of the feet, the battery voltage and the motor damping
+        at each reset() of the environment.
 
-    Args:
-      minitaur: the Minitaur instance in minitaur_gym_env environment.
-    """
+        Args:
+          minitaur: the Minitaur instance in minitaur_gym_env environment.
+        """
     base_mass = minitaur.GetBaseMassFromURDF()
     randomized_base_mass = random.uniform(
         base_mass * (1.0 + self._minitaur_base_mass_err_range[0]),
