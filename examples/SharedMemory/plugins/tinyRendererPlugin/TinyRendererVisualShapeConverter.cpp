@@ -1243,6 +1243,7 @@ void TinyRendererVisualShapeConverter::resetAll()
 		if (!m_data->m_textures[i].m_isCached)
 		{
       printf("free address %p\n", m_data->m_textures[i].textureData1);
+      printf("%c\n", *m_data->m_textures[i].textureData1);
 			free(m_data->m_textures[i].textureData1);
       printf("free %d called\n", i);
 		}
