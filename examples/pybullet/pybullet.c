@@ -6325,6 +6325,42 @@ static PyObject* pybullet_loadTexture(PyObject* self, PyObject* args, PyObject* 
 	return NULL;
 }
 
+static PyObject* pybullet_removeTexture(PyObject* self, PyObject* args, PyObject* keywds)
+{
+	int textureUniqueId = 0;
+	b3SharedMemoryCommandHandle commandHandle;
+	b3SharedMemoryStatusHandle statusHandle;
+	int statusType;
+
+	int physicsClientId = 0;
+	b3PhysicsClientHandle sm = 0;
+	static char* kwlist[] = {"textureUniqueId", "physicsClientId", NULL};
+	if (!PyArg_ParseTupleAndKeywords(args, keywds, "i|i", kwlist, &textureUniqueId, &physicsClientId))
+	{
+		return NULL;
+	}
+	sm = getPhysicsClient(physicsClientId);
+	if (sm == 0)
+	{
+		PyErr_SetString(SpamError, "Not connected to physics server.");
+		return NULL;
+	}
+
+	{
+		commandHandle = b3InitRemoveTexture(sm, textureUniqueId);
+		statusHandle = b3SubmitClientCommandAndWaitStatus(sm, commandHandle);
+		statusType = b3GetStatusType(statusHandle);
+		if (statusType == CMD_REMOVE_TEXTURE_COMPLETED)
+		{
+			PyObject* item;
+			item = PyInt_FromLong(b3GetStatusTextureUniqueId(statusHandle));
+			return item;
+		}
+	}
+	PyErr_SetString(SpamError, "Error removing texture.");
+	return NULL;
+}
+
 static PyObject* MyConvertContactPoint(struct b3ContactInformation* contactPointPtr)
 {
 	/*
@@ -10683,6 +10719,9 @@ static PyMethodDef SpamMethods[] = {
 
 	{"loadTexture", (PyCFunction)pybullet_loadTexture, METH_VARARGS | METH_KEYWORDS,
 	 "Load texture file."},
+
+	{"removeTexture", (PyCFunction)pybullet_removeTexture, METH_VARARGS | METH_KEYWORDS,
+	 "Remove texture in memory."},
 
 	{"changeTexture", (PyCFunction)pybullet_changeTexture, METH_VARARGS | METH_KEYWORDS,
 	 "Change a texture file."},
