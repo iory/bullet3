@@ -1,15 +1,11 @@
 #ifndef TINY_RENDERER_VISUAL_SHAPE_CONVERTER_H
 #define TINY_RENDERER_VISUAL_SHAPE_CONVERTER_H
 
-#include <set>
-
 #include "../../../Importers/ImportURDFDemo/UrdfRenderingInterface.h"
 
 struct TinyRendererVisualShapeConverter : public UrdfRenderingInterface
 {
 	struct TinyRendererVisualShapeConverterInternalData* m_data;
-
-	std::set<int> removed_texture_indices;
 
 	TinyRendererVisualShapeConverter();
 
@@ -53,7 +49,7 @@ struct TinyRendererVisualShapeConverter : public UrdfRenderingInterface
 
 	virtual int loadTextureFile(const char* filename, struct CommonFileIOInterface* fileIO);
 	virtual int registerTexture(unsigned char* texels, int width, int height);
-	virtual int removeTexture(int texture_unique_id);
+	virtual int removeTexture(int textureUniqueId);
 
 	virtual void syncTransform(int shapeUid, const class btTransform& worldTransform, const class btVector3& localScaling);
 };
