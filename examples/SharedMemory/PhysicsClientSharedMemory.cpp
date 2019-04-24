@@ -1220,6 +1220,15 @@ const SharedMemoryStatus* PhysicsClientSharedMemory::processServerStatus()
 				b3Warning("Load texture failed");
 				break;
 			}
+			case CMD_REMOVE_TEXTURE_COMPLETED:
+			{
+				break;
+			}
+			case CMD_REMOVE_TEXTURE_FAILED:
+			{
+				b3Warning("Remove texture failed");
+				break;
+			}
 			case CMD_BULLET_LOADING_COMPLETED:
 			{
 				break;

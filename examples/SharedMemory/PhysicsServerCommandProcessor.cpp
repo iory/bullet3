@@ -10799,6 +10799,20 @@ bool PhysicsServerCommandProcessor::processLoadTextureCommand(const struct Share
 	return hasStatus;
 }
 
+bool PhysicsServerCommandProcessor::processRemoveTextureCommand(const struct SharedMemoryCommand& clientCmd, struct SharedMemoryStatus& serverStatusOut, char* bufferServerToClient, int bufferSizeInBytes)
+{
+	bool hasStatus = true;
+
+	BT_PROFILE("CMD_REMOVE_TEXTURE");
+	SharedMemoryStatus& serverCmd = serverStatusOut;
+	serverCmd.m_type = CMD_REMOVE_TEXTURE_FAILED;
+
+	m_data->m_pluginManager.getRenderInterface()->removeTexture(clientCmd.m_removeTextureArguments.m_textureUniqueId);
+	m_data->m_guiHelper->removeTexture(clientCmd.m_removeTextureArguments.m_textureUniqueId);
+	serverCmd.m_type = CMD_REMOVE_TEXTURE_COMPLETED;
+  return hasStatus;
+}
+
 bool PhysicsServerCommandProcessor::processSaveStateCommand(const struct SharedMemoryCommand& clientCmd, struct SharedMemoryStatus& serverStatusOut, char* bufferServerToClient, int bufferSizeInBytes)
 {
 	BT_PROFILE("CMD_SAVE_STATE");
@@ -11384,6 +11398,11 @@ bool PhysicsServerCommandProcessor::processCommand(const struct SharedMemoryComm
 		case CMD_LOAD_TEXTURE:
 		{
 			hasStatus = processLoadTextureCommand(clientCmd, serverStatusOut, bufferServerToClient, bufferSizeInBytes);
+			break;
+		}
+		case CMD_REMOVE_TEXTURE:
+		{
+			hasStatus = processRemoveTextureCommand(clientCmd, serverStatusOut, bufferServerToClient, bufferSizeInBytes);
 			break;
 		}
 		case CMD_RESTORE_STATE:
