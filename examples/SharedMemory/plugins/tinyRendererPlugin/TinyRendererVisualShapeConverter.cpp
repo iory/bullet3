@@ -1284,50 +1284,41 @@ void TinyRendererVisualShapeConverter::changeShapeTexture(int objectUniqueId, in
 	}
 }
 
-int TinyRendererVisualShapeConverter::registerTexture(unsigned char* texels, int width, int height)
-{
-	MyTexture2 texData;
-	texData.m_width = width;
-	texData.m_height = height;
-	texData.textureData1 = texels;
-	texData.m_isCached = false;
-	m_data->m_textures.push_back(texData);
-	return m_data->m_textures.size() - 1;
+int TinyRendererVisualShapeConverter::registerTexture(unsigned char *texels,
+                                                      int width, int height) {
+  printf("TinyRendererVisualShapeConverter::registerTexture\n");
+  MyTexture2 texData;
+  texData.m_width = width;
+  texData.m_height = height;
+  texData.textureData1 = texels;
+  texData.m_isCached = false;
+  if (m_data->removed_texture_indices.size() > 0) {
+    int index = *m_data->removed_texture_indices.begin();
+    m_data->removed_texture_indices.erase(m_data->removed_texture_indices.begin());
+    m_data->m_textures[index] = texData;
+    return index;
+  } else {
+    m_data->m_textures.push_back(texData);
+    return m_data->m_textures.size() - 1;
+  }
 }
 
-int TinyRendererVisualShapeConverter::loadTextureFile(const char* filename, struct CommonFileIOInterface* fileIO)
-{
-	B3_PROFILE("loadTextureFile");
-	int width, height, n;
-	unsigned char* image = 0;
-	if (fileIO)
-	{
-		b3AlignedObjectArray<char> buffer;
-		buffer.reserve(1024);
-		int fileId = fileIO->fileOpen(filename,"rb");
-		if (fileId>=0)
-		{
-			int size = fileIO->getFileSize(fileId);
-			if (size>0)
-			{
-				buffer.resize(size);
-				int actual = fileIO->fileRead(fileId,&buffer[0],size);
-				if (actual != size)
-				{
-					b3Warning("image filesize mismatch!\n");
-					buffer.resize(0);
-				}
-			}
-			fileIO->fileClose(fileId);
-		}
-		if (buffer.size())
-		{
-			image = stbi_load_from_memory((const unsigned char*)&buffer[0], buffer.size(), &width, &height, &n, 3);
-		}
-	} else
-	{
-		image = stbi_load(filename, &width, &height, &n, 3);
-	}
+int TinyRendererVisualShapeConverter::removeTexture(int textureUniqueId) {
+  printf("removeTexture called\n");
+  printf("%d %d\n", textureUniqueId, m_data->m_textures.size());
+  if (0 <= textureUniqueId && textureUniqueId < m_data->m_textures.size()) {
+    if (m_data->removed_texture_indices.find(textureUniqueId) !=
+        m_data->removed_texture_indices.end()) {
+      printf("already removed\n");
+      return 0;
+    } else {
+      printf("stone free!!!!!!!!!!!\n");
+      m_data->m_textures[textureUniqueId].m_isCached = true;
+      free(m_data->m_textures[textureUniqueId].textureData1);
+      m_data->removed_texture_indices.insert(textureUniqueId);
+    }
+  }
+}
 
 	if (image && (width >= 0) && (height >= 0))
 	{
