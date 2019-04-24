@@ -33,6 +33,7 @@ subject to the following restrictions:
 #include "../TinyRenderer/model.h"
 #include "stb_image/stb_image.h"
 #include "../OpenGLWindow/ShapeData.h"
+#include <set>
 struct MyTexture2
 {
 	unsigned char* textureData1;
@@ -71,6 +72,7 @@ struct TinyRendererVisualShapeConverterInternalData
 	int m_swWidth;
 	int m_swHeight;
 	TGAImage m_rgbColorBuffer;
+  std::set<int> m_removedTextureIndices;
 	b3AlignedObjectArray<MyTexture2> m_textures;
 	b3AlignedObjectArray<float> m_depthBuffer;
 	b3AlignedObjectArray<float> m_shadowBuffer;
@@ -1245,6 +1247,7 @@ void TinyRendererVisualShapeConverter::resetAll()
 			free(m_data->m_textures[i].textureData1);
 		}
 	}
+  m_data->m_removedTextureIndices.clear();
 	m_data->m_textures.clear();
 	m_data->m_swRenderInstances.clear();
 	m_data->m_visualShapesMap.clear();
