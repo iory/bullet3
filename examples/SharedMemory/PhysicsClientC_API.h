@@ -312,6 +312,7 @@ extern "C"
 
 	B3_SHARED_API b3SharedMemoryCommandHandle b3InitLoadTexture(b3PhysicsClientHandle physClient, const char* filename);
 	B3_SHARED_API int b3GetStatusTextureUniqueId(b3SharedMemoryStatusHandle statusHandle);
+	B3_SHARED_API b3SharedMemoryCommandHandle b3InitRemoveTexture(b3PhysicsClientHandle physClient, int textureUniqueId);
 
 	B3_SHARED_API b3SharedMemoryCommandHandle b3CreateChangeTextureCommandInit(b3PhysicsClientHandle physClient, int textureUniqueId, int width, int height, const char* rgbPixels);
 
