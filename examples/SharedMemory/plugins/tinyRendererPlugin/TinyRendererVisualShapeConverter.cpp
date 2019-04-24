@@ -28,6 +28,7 @@ subject to the following restrictions:
 #include "../Importers/ImportMeshUtility/b3ImportMeshUtility.h"
 #include <iostream>
 #include <fstream>
+#include <malloc.h>
 #include "../Importers/ImportURDFDemo/UrdfParser.h"
 #include "../SharedMemory/SharedMemoryPublic.h"  //for b3VisualShapeData
 #include "../TinyRenderer/model.h"
@@ -1251,6 +1252,8 @@ void TinyRendererVisualShapeConverter::resetAll()
 	m_data->m_textures.clear();
 	m_data->m_swRenderInstances.clear();
 	m_data->m_visualShapesMap.clear();
+  int ret = malloc_trim(0);
+  printf("malloc_trim result %d\n", ret);
 }
 
 void TinyRendererVisualShapeConverter::changeShapeTexture(int objectUniqueId, int jointIndex, int shapeIndex, int textureUniqueId)
